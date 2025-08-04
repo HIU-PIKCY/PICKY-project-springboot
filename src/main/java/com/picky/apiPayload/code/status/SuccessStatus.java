@@ -1,7 +1,7 @@
 package com.picky.apiPayload.code.status;
 
-import checkmo.apiPayload.code.BaseCode;
-import checkmo.apiPayload.code.ReasonDTO;
+import com.picky.apiPayload.code.BaseCode;
+import com.picky.apiPayload.code.ReasonDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

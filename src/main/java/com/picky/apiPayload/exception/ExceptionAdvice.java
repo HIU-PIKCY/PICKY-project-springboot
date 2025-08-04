@@ -1,8 +1,8 @@
 package com.picky.apiPayload.exception;
 
-import checkmo.apiPayload.ApiResponse;
-import checkmo.apiPayload.code.ErrorReasonDTO;
-import checkmo.apiPayload.code.status.ErrorStatus;
+import com.picky.apiPayload.ApiResponse;
+import com.picky.apiPayload.code.ErrorReasonDTO;
+import com.picky.apiPayload.code.status.ErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;

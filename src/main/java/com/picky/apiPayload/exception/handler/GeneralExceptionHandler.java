@@ -1,8 +1,8 @@
 package com.picky.apiPayload.exception.handler;
 
-import checkmo.apiPayload.ApiResponse;
-import checkmo.apiPayload.code.ErrorReasonDTO;
-import checkmo.apiPayload.exception.GeneralException;
+import com.picky.apiPayload.ApiResponse;
+import com.picky.apiPayload.code.ErrorReasonDTO;
+import com.picky.apiPayload.exception.GeneralException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
