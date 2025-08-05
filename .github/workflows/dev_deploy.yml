@@ -30,9 +30,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/picky-docker:${{ github.sha }}
-
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
     # ======== CD: EC2에 배포 ========
 
