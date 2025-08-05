@@ -45,7 +45,7 @@ jobs:
 
       - name: Upload .env to EC2
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key && chmod 600 private_key
           scp -i private_key -o StrictHostKeyChecking=no .env ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/.env
 
       - name: Deploy to EC2
