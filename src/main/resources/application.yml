@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: dev # 배포용은 prod, 로컬용은 dev 로 바꿔 사용
+  application:
+    name: backend
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 1000

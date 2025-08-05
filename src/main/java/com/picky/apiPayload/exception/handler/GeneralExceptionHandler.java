@@ -43,7 +43,6 @@ public class GeneralExceptionHandler {
                 .body(ApiResponse.onFailure(errorReason.getCode(), errorReason));
     }
 
-    // ✅ 그 외 예외 (RuntimeException 포함)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<ErrorReasonDTO>> handleAllExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
