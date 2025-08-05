@@ -12,3 +12,9 @@ spring:
         use_sql_comments: false
         hbm2ddl:
           auto: update
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
