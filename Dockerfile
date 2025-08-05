@@ -8,4 +8,4 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/build/libs/*-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-Dmanagement.metrics.enable.system=false", "-Dmanagement.metrics.enable.process=false", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
