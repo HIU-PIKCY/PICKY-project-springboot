@@ -14,7 +14,10 @@ spring:
           auto: update
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+  metrics:
+    enable:
+      process: false
+      system: false
+    distribution:
+      percentiles-histogram:
+        http.server.requests: false
