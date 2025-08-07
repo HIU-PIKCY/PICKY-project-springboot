@@ -1,4 +1,4 @@
-package com.picky.domain.user.web.controller;
+package com.picky.domain.member.web.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/user")
 @Tag(name = "유저")
 @Slf4j
-public class UserController {
+public class MemberController {
 
 }

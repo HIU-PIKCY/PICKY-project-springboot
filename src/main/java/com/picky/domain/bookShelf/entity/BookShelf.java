@@ -1,6 +1,6 @@
 package com.picky.domain.bookShelf.entity;
 
-import com.picky.domain.user.entity.User;
+import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
 import com.picky.domain.question.entity.Question;
 import com.picky.global.enums.ReadingStatus;
@@ -35,7 +35,7 @@ public class BookShelf extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_pk", foreignKey = @ForeignKey(name = "fk_book_shelf_user"))
-  private User user;
+  private Member user;
 
   @Schema(description = "내용", example = "민음사")
   @Column(nullable = false, length = 512)

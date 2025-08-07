@@ -1,6 +1,6 @@
 package com.picky.domain.question.web.dto;
 
-import com.picky.domain.user.web.dto.BaseUserDTO;
+import com.picky.domain.member.web.dto.BaseUserDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;

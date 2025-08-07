@@ -1,7 +1,7 @@
 package com.picky.domain.questionLike.entity;
 
 import com.picky.domain.question.entity.Question;
-import com.picky.domain.user.entity.User;
+import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -28,5 +28,5 @@ public class QuestionLike extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_pk", foreignKey = @ForeignKey(name = "fk_question_like_user"))
-  private User user;
+  private Member member;
 }

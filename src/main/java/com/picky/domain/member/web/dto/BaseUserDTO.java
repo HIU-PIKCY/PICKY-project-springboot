@@ -1,6 +1,6 @@
-package com.picky.domain.user.web.dto;
+package com.picky.domain.member.web.dto;
 
-import com.picky.domain.user.entity.User;
+import com.picky.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +23,7 @@ public class BaseUserDTO {
   @Schema(description = "닉네임", example = "누누")
   private String nickname;
 
-  public BaseUserDTO(User user) {
+  public BaseUserDTO(Member user) {
     pk = user.getPk();
     name = user.getName();
     nickname = user.getNickname();

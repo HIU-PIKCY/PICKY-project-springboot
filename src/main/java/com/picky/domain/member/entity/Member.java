@@ -1,4 +1,4 @@
-package com.picky.domain.user.entity;
+package com.picky.domain.member.entity;
 
 import com.picky.global.entity.BaseEntity;
 import com.picky.global.enums.LoginType;
@@ -21,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User extends BaseEntity {
+public class Member extends BaseEntity {
 
   @Column(nullable = false, length = 256)
   private String name;

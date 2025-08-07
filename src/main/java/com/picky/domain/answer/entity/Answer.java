@@ -1,6 +1,6 @@
 package com.picky.domain.answer.entity;
 
-import com.picky.domain.user.entity.User;
+import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
 import com.picky.domain.question.entity.Question;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,7 +31,7 @@ public class Answer extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_pk", foreignKey = @ForeignKey(name = "fk_answer_user"))
-  private User user;
+  private Member user;
 
   @Schema(description = "내용", example = "민음사")
   @Column(nullable = false, length = 512)
