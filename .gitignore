@@ -36,6 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### yml file ###
+src/main/resources/application.yml
+
 .idea/
 .DS_Store
 .gradle/
