@@ -37,7 +37,7 @@ out/
 .vscode/
 
 ### yml file ###
-src/main/resources/application.yml
+# src/main/resources/application.yml
 
 .idea/
 .DS_Store
