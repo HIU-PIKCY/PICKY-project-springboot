@@ -1,23 +1,27 @@
 package com.picky.domain.member.entity;
 
+import com.picky.domain.answer.entity.Answer;
+import com.picky.domain.bookShelf.entity.BookShelf;
+import com.picky.domain.question.entity.Question;
+import com.picky.domain.questionLike.entity.QuestionLike;
 import com.picky.global.entity.BaseEntity;
-import com.picky.global.enums.LoginType;
+import com.picky.domain.member.entity.enums.LoginType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@Setter
 @Entity
-@Table(name = "User")
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,4 +44,19 @@ public class Member extends BaseEntity {
   @Column(length = 10)
   private String nickname;
 
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<Answer> answers = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<BookShelf> bookShelves = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<Question> questions = new ArrayList<>();
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<QuestionLike> questionLikes = new ArrayList<>();
 }
