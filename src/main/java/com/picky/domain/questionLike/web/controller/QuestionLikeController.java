@@ -1,4 +1,4 @@
-package com.picky.domain.questionLike;
+package com.picky.domain.questionLike.web.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/question-like")
 @Tag(name = "질문 좋아요")
-@Slf4j
 public class QuestionLikeController {
 
 }

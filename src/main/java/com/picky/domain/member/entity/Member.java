@@ -44,7 +44,7 @@ public class Member extends BaseEntity {
   @Column(length = 10)
   private String nickname;
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<Answer> answers = new ArrayList<>();
 
@@ -52,11 +52,11 @@ public class Member extends BaseEntity {
   @Builder.Default
   private List<BookShelf> bookShelves = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<Question> questions = new ArrayList<>();
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<QuestionLike> questionLikes = new ArrayList<>();
 }
