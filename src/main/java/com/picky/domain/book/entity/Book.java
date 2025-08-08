@@ -13,9 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@Setter
 @Entity
-@Table(name = "Book")
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,6 +39,5 @@ public class Book extends BaseEntity {
   private Long isbn;
 
   @Schema(description = "출판 일자", example = "2025-03-12T07:45:20")
-  @Column()
   private LocalDateTime publishAt;
 }
