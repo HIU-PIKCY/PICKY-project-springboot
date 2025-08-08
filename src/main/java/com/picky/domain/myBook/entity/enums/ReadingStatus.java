@@ -1,4 +1,4 @@
-package com.picky.global.enums;
+package com.picky.domain.myBook.entity.enums;
 
 public enum ReadingStatus {
   READING,
