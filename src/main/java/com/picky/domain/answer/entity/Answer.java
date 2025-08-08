@@ -11,6 +11,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -35,5 +36,6 @@ public class Answer extends BaseEntity {
   private String content;
 
   @Schema(description = "AI 생성 여부", example = "false")
+  @Builder.Default
   private Boolean isAiGenerated = false;
 }

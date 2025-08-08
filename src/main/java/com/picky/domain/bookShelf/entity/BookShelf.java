@@ -1,9 +1,10 @@
 package com.picky.domain.bookShelf.entity;
 
+import com.picky.domain.book.entity.Book;
 import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
 import com.picky.domain.question.entity.Question;
-import com.picky.domain.myBook.entity.enums.ReadingStatus;
+import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +29,7 @@ public class BookShelf extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "book_pk", foreignKey = @ForeignKey(name = "fk_book_shelf_book"))
-  private Question question;
+  private Book book;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_pk", foreignKey = @ForeignKey(name = "fk_book_shelf_member"))
@@ -41,5 +42,5 @@ public class BookShelf extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   @Builder.Default
-  private ReadingStatus Readingstatus = ReadingStatus.READING;
+  private ReadingStatus readingStatus = ReadingStatus.READING;
 }
