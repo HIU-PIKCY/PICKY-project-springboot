@@ -32,7 +32,7 @@ public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "각 데이터의 PK값", example = "1")
-    private Long pk;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

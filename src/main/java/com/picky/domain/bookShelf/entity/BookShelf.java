@@ -1,10 +1,9 @@
 package com.picky.domain.bookShelf.entity;
 
 import com.picky.domain.book.entity.Book;
+import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
-import com.picky.domain.question.entity.Question;
-import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,11 +27,11 @@ import lombok.experimental.SuperBuilder;
 public class BookShelf extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "book_pk", foreignKey = @ForeignKey(name = "fk_book_shelf_book"))
+  @JoinColumn(name = "book_id", foreignKey = @ForeignKey(name = "fk_book_shelf_book"))
   private Book book;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_pk", foreignKey = @ForeignKey(name = "fk_book_shelf_member"))
+  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_book_shelf_member"))
   private Member member;
 
   @Schema(description = "내용", example = "민음사")

@@ -24,11 +24,11 @@ import lombok.experimental.SuperBuilder;
 public class Answer extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "question_pk", foreignKey = @ForeignKey(name = "fk_answer_question"))
+  @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "fk_answer_question"))
   private Question question;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_pk", foreignKey = @ForeignKey(name = "fk_answer_member"))
+  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_answer_member"))
   private Member member;
 
   @Schema(description = "내용", example = "민음사")

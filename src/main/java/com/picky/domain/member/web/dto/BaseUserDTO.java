@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 public class BaseUserDTO {
 
   @Schema(example = "1", description = "유저 pk값")
-  private Long pk;
+  private Long id;
 
   @Schema(description = "이름", example = "박건우")
   private String name;
@@ -24,7 +24,7 @@ public class BaseUserDTO {
   private String nickname;
 
   public BaseUserDTO(Member user) {
-    pk = user.getPk();
+    id = user.getId();
     name = user.getName();
     nickname = user.getNickname();
   }

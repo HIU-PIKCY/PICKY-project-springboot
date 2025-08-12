@@ -33,11 +33,11 @@ import lombok.experimental.SuperBuilder;
 public class Question extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "book_pk", foreignKey = @ForeignKey(name = "fk_question_book"))
+  @JoinColumn(name = "book_id", foreignKey = @ForeignKey(name = "fk_question_book"))
   private Book book;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_pk", foreignKey = @ForeignKey(name = "fk_question_member"))
+  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_question_member"))
   private Member member;
 
   @Schema(description = "내용", example = "민음사")

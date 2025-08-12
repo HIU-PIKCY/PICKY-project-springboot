@@ -21,10 +21,10 @@ import lombok.experimental.SuperBuilder;
 public class QuestionLike extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "question_pk", foreignKey = @ForeignKey(name = "fk_question_like_question"))
+  @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "fk_question_like_question"))
   private Question question;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_pk", foreignKey = @ForeignKey(name = "fk_question_like_member"))
+  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_question_like_member"))
   private Member member;
 }
