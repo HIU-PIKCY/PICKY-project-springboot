@@ -23,14 +23,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Answer extends BaseEntity {
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "fk_answer_question"))
-  private Question question;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_answer_member"))
-  private Member member;
-
   @Schema(description = "내용", example = "민음사")
   @Column(nullable = false, length = 512)
   private String content;
@@ -38,4 +30,12 @@ public class Answer extends BaseEntity {
   @Schema(description = "AI 생성 여부", example = "false")
   @Builder.Default
   private Boolean isAiGenerated = false;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "question_id", foreignKey = @ForeignKey(name = "fk_answer_question"))
+  private Question question;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_answer_member"))
+  private Member member;
 }

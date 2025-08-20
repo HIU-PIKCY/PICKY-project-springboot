@@ -3,8 +3,24 @@ spring:
     active: dev # 배포용은 prod, 로컬용은 dev 로 바꿔 사용
   application:
     name: backend
+  datasource:
+    url: ${DEV_DB_URL}
+    username: ${DEV_DB_USERNAME}
+    password: ${DEV_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        default_batch_fetch_size: 1000
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+        hbm2ddl:
+          auto: update
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+#naver:
+#  client:
+#    id: "네이버ClientId"
+#    secret: "네이버ClientSecret"

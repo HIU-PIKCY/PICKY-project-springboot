@@ -44,7 +44,7 @@ public class Book extends BaseEntity {
   private String isbn;
 
   @Schema(description = "출판 일자", example = "2025-03-12T07:45:20")
-  private LocalDateTime publishAt;
+  private LocalDateTime publisedhAt;
 
   @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
   @Builder.Default
