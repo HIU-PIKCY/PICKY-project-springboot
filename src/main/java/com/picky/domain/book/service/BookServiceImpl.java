@@ -2,7 +2,6 @@ package com.picky.domain.book.service;
 
 import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
