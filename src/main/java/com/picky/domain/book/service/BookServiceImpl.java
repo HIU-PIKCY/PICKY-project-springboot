@@ -1,13 +1,19 @@
 package com.picky.domain.book.service;
 
 import com.picky.domain.book.web.dto.BookDTO;
+import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -21,9 +27,22 @@ public class BookServiceImpl implements BookService {
   @Value("${kakao.api.key}")
   private String kakaoApiKey;
 
-  public List<BookDTO> searchBooks(String keyword) {
+  public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
+      String targetParam = switch (request.getType().toLowerCase()) {
+          case "title" -> "title";
+          case "author" -> "person";
+          default -> null; // 전체 검색
+      };
+      int page = pageable.getPageNumber() + 1; // Spring Pageable는 0부터, Kakao API는 1부터
+      int size = pageable.getPageSize();
+
+      String uri = "https://dapi.kakao.com/v3/search/book?query={keyword}&page={page}&size={size}";
+      if (targetParam != null) {
+          uri += "&target=" + targetParam;
+      }
+
     BookResponseDTO kakaoRes = restClient.get()
-        .uri("https://dapi.kakao.com/v3/search/book?query={keyword}", keyword)
+        .uri(uri, request.getKeyword(), page, size)
         .header("Authorization", "KakaoAK " + kakaoApiKey)
         .retrieve()
         .body(BookResponseDTO.class);
@@ -41,11 +60,10 @@ public class BookServiceImpl implements BookService {
     if (kakaoRes.getDocuments() != null) {
       for (BookResponseDTO.Document doc : kakaoRes.getDocuments()) {
         BookDTO book = new BookDTO();
-        book.setId(doc.getId());
         book.setTitle(doc.getTitle());
         book.setAuthor(doc.getAuthors());
         book.setPublisher(doc.getPublisher());
-        book.setCoverImage(doc.getCoverImage());
+        book.setCoverImage(doc.getThumbnail());
         book.setIsbn(doc.getIsbn());
         if (doc.getDatetime() != null) {
           OffsetDateTime odt = OffsetDateTime.parse(
@@ -71,6 +89,10 @@ public class BookServiceImpl implements BookService {
       }
     }
 */
-    return results;
+      long total = 0L;
+      if (kakaoRes != null && kakaoRes.getMeta() != null) {
+          total = kakaoRes.getMeta().getPageable_count(); // 페이징 가능한 결과 수
+      }
+    return new PageImpl<>(results, pageable, total);
   }
 }

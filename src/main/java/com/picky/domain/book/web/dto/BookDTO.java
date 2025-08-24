@@ -14,8 +14,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Schema(description = "책 DTO")
 public class BookDTO {
-  @Schema(description = "책 id", example = "1")
-  private Long id;
 
   @Schema(description = "책 제목", example = "동물농장")
   private String title;
