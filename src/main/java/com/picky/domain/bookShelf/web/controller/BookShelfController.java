@@ -1,9 +1,7 @@
 package com.picky.domain.bookShelf.web.controller;
 
-import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.bookShelf.dto.BookListDTO;
 import com.picky.domain.bookShelf.dto.BookListRequestDTO;
-import com.picky.domain.bookShelf.service.BookShelfService;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
 import com.picky.global.common.ResponseDTO;
