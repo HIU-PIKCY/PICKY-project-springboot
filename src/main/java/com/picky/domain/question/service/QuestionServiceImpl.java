@@ -129,7 +129,14 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional // 조회수 증가 메서드 때문에 붙임
     public QuestionDetailResponseDTO getQuestionDetail(Long questionId, Long memberId) {
+
+        // 조회수 증가
+        int updatedViews = questionRepository.increaseViews(questionId);
+        if (updatedViews == 0) {
+            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND);
+        }
 
         Question question = questionRepository.findWithBookById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));

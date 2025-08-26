@@ -4,6 +4,7 @@ import com.picky.domain.question.entity.Question;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
@@ -49,4 +50,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
     List<Object[]> countAnswersByQuestionIds(@Param("questionIds") List<Long> questionIds);
 
     List<Question> findByBookId(Long bookId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("update Question q set q.views = q.views + 1 where q.id = :id")
+    int increaseViews(@Param("id") Long id);
 }
