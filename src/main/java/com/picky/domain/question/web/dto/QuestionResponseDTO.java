@@ -70,6 +70,7 @@ public class QuestionResponseDTO {
         private String title;
         private String content;
         private int views;
+        private int likes; // 좋아요 수
         private int answersCount;
         private Boolean isAI;
         private int page;

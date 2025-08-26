@@ -2,6 +2,7 @@ package com.picky.domain.question.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
@@ -33,6 +34,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
     private final QuestionLikeRepository questionLikeRepository;
+    private final AnswerRepository answerRepository;
 
     @Override
     @Transactional
@@ -154,8 +156,8 @@ public class QuestionServiceImpl implements QuestionService {
                 .author(question.getMember().getNickname())
                 .isAI(question.getIsAiGenerated())
                 .views(question.getViews())
-                .likes(question.getQuestionLikes().size())
-                .answersCount(question.getAnswers().size())
+                .likes(questionLikeRepository.countByQuestion(question))
+                .answersCount(answerRepository.countByQuestion(question))
                 .page(question.getPageNum())
                 .createdAt(question.getCreatedAt())
                 .book(QuestionResponseDTO.BookInfoResponseDTO.builder()
@@ -181,7 +183,8 @@ public class QuestionServiceImpl implements QuestionService {
                     .title(q.getTitle())
                     .content(q.getContent())
                     .views(q.getViews())
-                    .answersCount(q.getAnswers().size())
+                    .likes(questionLikeRepository.countByQuestion(q))
+                    .answersCount(answerRepository.countByQuestion(q))
                     .isAI(q.getIsAiGenerated())
                     .page(q.getPageNum())
                     .createdAt(q.getCreatedAt())
