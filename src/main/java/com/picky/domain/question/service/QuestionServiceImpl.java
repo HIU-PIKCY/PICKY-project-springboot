@@ -124,7 +124,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .book(question.getBook().getTitle())
                 .likes(Math.toIntExact(likeCountMap.getOrDefault(question.getId(), 0L)))
                 .comments(Math.toIntExact(answerCountMap.getOrDefault(question.getId(), 0L)))
-                .views(0)
+                .views(question.getViews())
                 .build();
     }
 
