@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 public class QuestionResponseDTO {
 
@@ -76,4 +77,26 @@ public class QuestionResponseDTO {
         private LocalDateTime createdAt;
     }
 
+    // 사용자 질문 목록 조회
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyQuestionDTO {
+        private Long id;
+        private String title;
+        private String author;
+        private String book;
+        private Integer likes;
+        private Integer comments;
+        private Integer views;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyQuestionsResponseDTO {
+        private List<MyQuestionDTO> questions;
+    }
 }
