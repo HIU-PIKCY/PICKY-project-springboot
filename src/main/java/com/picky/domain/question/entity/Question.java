@@ -45,9 +45,9 @@ public class Question extends BaseEntity {
   @Column(nullable = false, length = 512)
   private String content;
 
-  private Integer pageNum;
+  private int pageNum;
 
-  private Integer views;
+  private int views;
 
   @Builder.Default
   private Boolean isAiGenerated = false;

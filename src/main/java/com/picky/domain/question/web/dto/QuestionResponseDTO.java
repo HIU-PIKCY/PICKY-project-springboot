@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 public class QuestionResponseDTO {
 
@@ -18,7 +17,7 @@ public class QuestionResponseDTO {
         private Long id;
         private String title;
         private String content;
-        private Integer page;
+        private int page;
         private Boolean isAI;
         private LocalDateTime createdAt;
     }
@@ -33,10 +32,10 @@ public class QuestionResponseDTO {
         private String content;
         private String author; // 멤버 (질문 작성자)
         private Boolean isAI;
-        private Integer views;
-        private Integer likes;
-        private Integer answersCount;
-        private Integer page;
+        private int views;
+        private int likes;
+        private int answersCount;
+        private int page;
         private LocalDateTime createdAt;
         private BookInfoResponseDTO book; // 관련 책 정보
         private Boolean isLiked; // 사용자가 좋아요를 눌렀는지 여부
@@ -58,7 +57,7 @@ public class QuestionResponseDTO {
     @Builder
     public static class QuestionListResponseDTO { // 질문 목록 응답 DTO
         private List<QuestionInfoResponseDTO> questions; // 질문 목록
-        private Integer totalCount; // 전체 질문 수
+        private int totalCount; // 전체 질문 수
         private boolean hasMore; // 추가 데이터 존재 여부
     }
 
@@ -70,10 +69,10 @@ public class QuestionResponseDTO {
         private Long id;
         private String title;
         private String content;
-        private Integer views;
-        private Integer answersCount;
+        private int views;
+        private int answersCount;
         private Boolean isAI;
-        private Integer page;
+        private int page;
         private LocalDateTime createdAt;
     }
 
@@ -87,9 +86,9 @@ public class QuestionResponseDTO {
         private String title;
         private String author;
         private String book;
-        private Integer likes;
-        private Integer comments;
-        private Integer views;
+        private int likes;
+        private int comments;
+        private int views;
     }
 
     @Getter

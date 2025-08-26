@@ -11,6 +11,8 @@ import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionInfoResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
 import com.picky.domain.questionLike.repository.QuestionLikeRepository;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
@@ -153,5 +155,33 @@ public class QuestionServiceImpl implements QuestionService {
                         .build())
                 .isLiked(isLiked)
                 .build();
+    }
+
+    @Override
+    public QuestionListResponseDTO getQuestionList(Long bookId) {
+
+        bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND));
+
+        List<Question> questions = questionRepository.findByBookId(bookId);
+
+        List<QuestionInfoResponseDTO> questionInfoResponseDTOs = questions.stream()
+                .map(q -> QuestionResponseDTO.QuestionInfoResponseDTO.builder()
+                    .id(q.getId())
+                    .title(q.getTitle())
+                    .content(q.getContent())
+                    .views(q.getViews())
+                    .answersCount(q.getAnswers().size())
+                    .isAI(q.getIsAiGenerated())
+                    .page(q.getPageNum())
+                    .createdAt(q.getCreatedAt())
+                    .build())
+            .collect(Collectors.toList());
+
+        return QuestionListResponseDTO.builder()
+            .questions(questionInfoResponseDTOs)
+            .totalCount(questionInfoResponseDTOs.size())
+            .hasMore(false) // TODO: 추후 페이징 한다면 처리
+            .build();
     }
 }

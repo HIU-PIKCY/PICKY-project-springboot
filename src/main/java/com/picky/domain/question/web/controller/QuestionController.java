@@ -42,11 +42,11 @@ public class QuestionController {
         return ApiResponse.onSuccess(questionService.getQuestionDetail(questionId, memberId));
     }
 
-//    @Operation(summary = "질문 목록 조회 API", description = "책에 대한 질문 목록을 조회합니다.")
-//    @GetMapping("/books/{bookId}/questions")
-//    public ApiResponse<QuestionListResponseDTO> getQuestionList(@PathVariable Long bookId) {
-//        return ApiResponse.onSuccess(questionService.getQuestionList(bookId));
-//    }
+    @Operation(summary = "책에 대한 질문 목록 조회 API", description = "책에 대한 질문 목록을 조회합니다.")
+    @GetMapping("/books/{bookId}/questions")
+    public ApiResponse<QuestionListResponseDTO> getQuestionList(@PathVariable Long bookId) {
+        return ApiResponse.onSuccess(questionService.getQuestionList(bookId));
+    }
 
     @Operation(summary = "사용자 질문 목록 조회 API", description = "특정 사용자가 작성한 모든 질문 목록을 조회합니다.")
     @GetMapping("/members/{memberId}/questions")

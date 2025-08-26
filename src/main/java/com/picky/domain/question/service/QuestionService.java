@@ -2,6 +2,7 @@ package com.picky.domain.question.service;
 
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
 
@@ -33,4 +34,11 @@ public interface QuestionService {
      * @return 사용자가 작성한 질문 목록
      */
     MyQuestionsResponseDTO getMyQuestions(Long memberId);
+
+    /**
+     * 도서별 질문 목록을 조회합니다.
+     * @param bookId
+     * @return 질문 목록 응답 DTO
+     */
+    QuestionListResponseDTO getQuestionList(Long bookId);
 }

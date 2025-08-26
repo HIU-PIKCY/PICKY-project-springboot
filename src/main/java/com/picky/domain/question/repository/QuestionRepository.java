@@ -20,6 +20,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
         WHERE q.id = :questionId
         """)
     Optional<Question> findWithBookById(@Param("questionId") Long questionId);
+
     /**
      * 특정 사용자가 작성한 질문 목록을 조회합니다. (기본 질문 정보와 책 정보만 조회)
      */
@@ -46,4 +47,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
             "WHERE q.id IN :questionIds " +
             "GROUP BY q.id")
     List<Object[]> countAnswersByQuestionIds(@Param("questionIds") List<Long> questionIds);
+
+    List<Question> findByBookId(Long bookId);
 }
