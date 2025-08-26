@@ -141,8 +141,11 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepository.findWithBookById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
         // 좋아요 여부 확인
-        Boolean isLiked = questionLikeRepository.existsByMemberIdAndQuestionId(memberId, questionId);
+        Boolean isLiked = questionLikeRepository.existsByMemberAndQuestion(member, question);
 
         return QuestionDetailResponseDTO.builder()
                 .id(question.getId())

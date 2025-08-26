@@ -26,7 +26,11 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "해당 멤버를 찾을 수 없습니다."),
 
     // 질문
-    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_404", "해당 질문을 찾을 수 없습니다.");
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_404", "해당 질문을 찾을 수 없습니다."),
+
+    // 질문 좋아요
+    ALREADY_LIKED(HttpStatus.BAD_REQUEST, "QUESTION_LIKE_401", "이미 좋아요를 눌렀습니다."),
+    QUESTION_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_LIKE_404", "해당 질문 좋아요를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
