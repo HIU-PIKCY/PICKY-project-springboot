@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface QuestionLikeRepository extends JpaRepository<QuestionLike, Long>,
     QuerydslPredicateExecutor<QuestionLike> {
 
+    Boolean existsByMemberIdAndQuestionId(Long questionId, Long memberId);
+
 }

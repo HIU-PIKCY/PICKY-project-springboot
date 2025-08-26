@@ -9,7 +9,10 @@ import com.picky.domain.member.repository.MemberRepository;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
+import com.picky.domain.questionLike.repository.QuestionLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
+    private final QuestionLikeRepository questionLikeRepository;
 
     @Override
     @Transactional
@@ -51,6 +55,35 @@ public class QuestionServiceImpl implements QuestionService {
                 .page(savedQuestion.getPageNum())
                 .isAI(savedQuestion.getIsAiGenerated())
                 .createdAt(savedQuestion.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public QuestionDetailResponseDTO getQuestionDetail(Long questionId, Long memberId) {
+
+        Question question = questionRepository.findWithBookById(questionId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        // 좋아요 여부 확인
+        Boolean isLiked = questionLikeRepository.existsByMemberIdAndQuestionId(memberId, questionId);
+
+        return QuestionDetailResponseDTO.builder()
+                .id(question.getId())
+                .title(question.getTitle())
+                .content(question.getContent())
+                .author(question.getMember().getNickname())
+                .isAI(question.getIsAiGenerated())
+                .views(question.getViews())
+                .likes(question.getQuestionLikes().size())
+                .answersCount(question.getAnswers().size())
+                .page(question.getPageNum())
+                .createdAt(question.getCreatedAt())
+                .book(QuestionResponseDTO.BookInfoResponseDTO.builder()
+                        .id(question.getBook().getId())
+                        .title(question.getBook().getTitle())
+                        .author(question.getBook().getAuthor())
+                        .build())
+                .isLiked(isLiked)
                 .build();
     }
 }

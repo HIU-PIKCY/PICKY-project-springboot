@@ -47,6 +47,8 @@ public class Question extends BaseEntity {
 
   private Integer pageNum;
 
+  private Integer views;
+
   @Builder.Default
   private Boolean isAiGenerated = false;
 
