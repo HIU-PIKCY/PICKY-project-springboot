@@ -2,6 +2,7 @@ package com.picky.domain.question.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
@@ -9,7 +10,12 @@ import com.picky.domain.member.repository.MemberRepository;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionInfoResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
+import com.picky.domain.questionLike.repository.QuestionLikeRepository;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionDTO;
 import java.util.List;
@@ -27,6 +33,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
+    private final QuestionLikeRepository questionLikeRepository;
 
     @Override
     @Transactional
@@ -118,7 +125,75 @@ public class QuestionServiceImpl implements QuestionService {
                 .book(question.getBook().getTitle())
                 .likes(Math.toIntExact(likeCountMap.getOrDefault(question.getId(), 0L)))
                 .comments(Math.toIntExact(answerCountMap.getOrDefault(question.getId(), 0L)))
-                .views(0)
+                .views(question.getViews())
                 .build();
+    }
+
+    @Override
+    @Transactional // 조회수 증가 메서드 때문에 붙임
+    public QuestionDetailResponseDTO getQuestionDetail(Long questionId, Long memberId) {
+
+        // 조회수 증가
+        int updatedViews = questionRepository.increaseViews(questionId);
+        if (updatedViews == 0) {
+            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND);
+        }
+
+        Question question = questionRepository.findByIdWithBookAndMember(questionId)
+                                              .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        // 좋아요 여부 확인
+        Boolean isLiked = questionLikeRepository.existsByMemberAndQuestion(member, question);
+
+        return QuestionDetailResponseDTO.builder()
+                .id(question.getId())
+                .title(question.getTitle())
+                .content(question.getContent())
+                .author(question.getMember().getNickname())
+                .isAI(question.getIsAiGenerated())
+                .views(question.getViews())
+                .likes(question.getQuestionLikes().size())
+                .answersCount(question.getAnswers().size())
+                .page(question.getPageNum())
+                .createdAt(question.getCreatedAt())
+                .book(QuestionResponseDTO.BookInfoResponseDTO.builder()
+                        .id(question.getBook().getId())
+                        .title(question.getBook().getTitle())
+                        .author(question.getBook().getAuthor())
+                        .build())
+                .isLiked(isLiked)
+                .build();
+    }
+
+    @Override
+    public QuestionListResponseDTO getQuestionList(Long bookId) {
+
+        bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND));
+
+        List<Question> questions = questionRepository.findByBookIdWithBook(bookId);
+
+        List<QuestionInfoResponseDTO> questionInfoResponseDTOs = questions.stream()
+                .map(q -> QuestionResponseDTO.QuestionInfoResponseDTO.builder()
+                    .id(q.getId())
+                    .title(q.getTitle())
+                    .content(q.getContent())
+                    .views(q.getViews())
+                    .likes(q.getQuestionLikes().size())
+                    .answersCount(q.getAnswers().size())
+                    .isAI(q.getIsAiGenerated())
+                    .page(q.getPageNum())
+                    .createdAt(q.getCreatedAt())
+                    .build())
+            .collect(Collectors.toList());
+
+        return QuestionListResponseDTO.builder()
+            .questions(questionInfoResponseDTOs)
+            .totalCount(questionInfoResponseDTOs.size())
+            .hasMore(false) // TODO: 추후 페이징 한다면 처리
+            .build();
     }
 }
