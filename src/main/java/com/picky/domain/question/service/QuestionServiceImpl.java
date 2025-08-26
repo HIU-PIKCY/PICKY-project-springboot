@@ -34,7 +34,6 @@ public class QuestionServiceImpl implements QuestionService {
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
     private final QuestionLikeRepository questionLikeRepository;
-    private final AnswerRepository answerRepository;
 
     @Override
     @Transactional
@@ -140,8 +139,8 @@ public class QuestionServiceImpl implements QuestionService {
             throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND);
         }
 
-        Question question = questionRepository.findWithBookById(questionId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+        Question question = questionRepository.findByIdWithBookAndMember(questionId)
+                                              .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -156,8 +155,8 @@ public class QuestionServiceImpl implements QuestionService {
                 .author(question.getMember().getNickname())
                 .isAI(question.getIsAiGenerated())
                 .views(question.getViews())
-                .likes(questionLikeRepository.countByQuestion(question))
-                .answersCount(answerRepository.countByQuestion(question))
+                .likes(question.getQuestionLikes().size())
+                .answersCount(question.getAnswers().size())
                 .page(question.getPageNum())
                 .createdAt(question.getCreatedAt())
                 .book(QuestionResponseDTO.BookInfoResponseDTO.builder()
@@ -175,7 +174,7 @@ public class QuestionServiceImpl implements QuestionService {
         bookRepository.findById(bookId)
             .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND));
 
-        List<Question> questions = questionRepository.findByBookId(bookId);
+        List<Question> questions = questionRepository.findByBookIdWithBook(bookId);
 
         List<QuestionInfoResponseDTO> questionInfoResponseDTOs = questions.stream()
                 .map(q -> QuestionResponseDTO.QuestionInfoResponseDTO.builder()
@@ -183,8 +182,8 @@ public class QuestionServiceImpl implements QuestionService {
                     .title(q.getTitle())
                     .content(q.getContent())
                     .views(q.getViews())
-                    .likes(questionLikeRepository.countByQuestion(q))
-                    .answersCount(answerRepository.countByQuestion(q))
+                    .likes(q.getQuestionLikes().size())
+                    .answersCount(q.getAnswers().size())
                     .isAI(q.getIsAiGenerated())
                     .page(q.getPageNum())
                     .createdAt(q.getCreatedAt())
