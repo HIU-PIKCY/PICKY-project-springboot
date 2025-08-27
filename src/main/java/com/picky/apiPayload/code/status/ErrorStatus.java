@@ -23,7 +23,8 @@ public enum ErrorStatus implements BaseErrorCode {
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_404", "해당 책을 찾을 수 없습니다."),
 
     // 멤버
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "해당 멤버를 찾을 수 없습니다.");
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "해당 멤버를 찾을 수 없습니다."),
+    MEMBER_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER_400", "이미 존재하는 이메일입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

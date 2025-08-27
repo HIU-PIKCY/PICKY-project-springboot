@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -23,11 +25,16 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll() // Swagger UI 접근 허용
-                .requestMatchers("/health", "/ping").permitAll() // 헬스 체크 엔드포인트 접근 허용
-                .requestMatchers("/**").permitAll() // TODO: JWT 로그인 구현 후 반드시 삭제!!
+                .requestMatchers("/api/member/sign-up").permitAll() // 헬스 체크 엔드포인트 접근 허용
+                .requestMatchers("/**").permitAll()
                 .anyRequest().authenticated()
             );
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }

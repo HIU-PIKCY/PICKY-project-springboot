@@ -6,12 +6,9 @@ import com.picky.domain.question.entity.Question;
 import com.picky.domain.questionLike.entity.QuestionLike;
 import com.picky.global.entity.BaseEntity;
 import com.picky.domain.member.entity.enums.LoginType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
+
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -27,13 +24,16 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Member extends BaseEntity {
 
+  @Column(nullable = false, length = 50, unique = true)
+  private String memberId;
+
   @Column(nullable = false, length = 256)
   private String name;
 
   @Column(nullable = false, length = 256)
   private String password;
 
-  @Column(nullable = false, length = 256)
+  @Column(nullable = false, length = 256, unique = true)
   private String email;
 
   @Enumerated(EnumType.STRING)
@@ -43,6 +43,10 @@ public class Member extends BaseEntity {
 
   @Column(length = 10)
   private String nickname;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Builder.Default
+  private List<String> roles = new ArrayList<>();
 
   @OneToMany(mappedBy = "member")
   @Builder.Default
