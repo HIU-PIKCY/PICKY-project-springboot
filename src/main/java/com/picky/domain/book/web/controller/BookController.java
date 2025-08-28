@@ -5,6 +5,7 @@ import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.member.entity.Member;
+import com.picky.domain.member.service.MemberServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
 import com.picky.global.common.ResponseDTO;
 import com.picky.global.enums.ResponseCode;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "책")
 public class BookController {
   private final BookServiceImpl bookService;
+  private final MemberServiceImpl memberService;
 
   @GetMapping("/search")
   public ResponseEntity<ResponseDTO<List<BookDTO>>> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
@@ -46,7 +48,7 @@ public class BookController {
     @GetMapping("/{bookId}")
     public ResponseEntity<ResponseDTO<BookDetailDTO>> getBookDetail(@PathVariable Long bookId)
     {
-        Member member = null;
+        Member member = memberService.findById(1L);
         //todo : 토큰으로부터 member 불러오기
         BookDetailDTO bookdto = bookService.getBookDetailById(bookId, member.getId());
         if(bookdto==null) throw new NotFoundException(ResponseCode.NOT_FOUND_BOOK);

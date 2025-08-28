@@ -1,5 +1,6 @@
 package com.picky.domain.book.service;
 
+import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.entity.QBook;
 import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.book.web.dto.BookDetailDTO;
@@ -9,9 +10,12 @@ import com.picky.domain.book.web.dto.BookResponseDTO;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
 import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,25 +98,32 @@ public class BookServiceImpl implements BookService {
         QBook book = QBook.book;
         QBookShelf bookShelf = QBookShelf.bookShelf;
 
-        return queryFactory
-                .select(Projections.constructor(BookDetailDTO.class,
-                        book.title,
-                        book.author,
-                        book.publisher,
-                        book.coverImage,
-                        book.isbn,
-                        book.publishedAt,
-                        book.pageCount,
-                        // 서재에 추가 여부: leftJoin 결과가 null이 아니면 true
-                        bookShelf.id.isNotNull(),
-                        bookShelf.readingStatus
-                ))
-                .from(book)
-                .leftJoin(bookShelf)
-                .on(book.id.eq(bookShelf.book.id)
-                        .and(bookShelf.member.id.eq(memberId))
-                        .and(bookShelf.status.eq(DataStatus.ACTIVATED)))
+        Book bookEntity = queryFactory
+                .selectFrom(book)
                 .where(book.id.eq(bookId))
                 .fetchOne();
+
+        if (bookEntity == null) {
+            return null;
+        }
+
+        // 서재 정보 조회
+        BooleanExpression inLibrary = bookShelf.book.id.eq(bookId)
+                .and(bookShelf.member.id.eq(memberId))
+                .and(bookShelf.status.eq(DataStatus.ACTIVATED));
+
+        BookShelf shelf = queryFactory
+                .selectFrom(bookShelf)
+                .where(inLibrary)
+                .fetchFirst();
+
+        // Entity 기반 DTO 생성
+        BookDetailDTO dto = BookDetailDTO.fromEntity(bookEntity);
+
+        if (shelf != null) {
+            dto.setIsInLibrary(true);
+            dto.setReadingStatus(shelf.getReadingStatus());
+        }
+        return dto;
     }
 }
