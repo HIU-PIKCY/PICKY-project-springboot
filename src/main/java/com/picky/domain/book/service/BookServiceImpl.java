@@ -1,12 +1,85 @@
 package com.picky.domain.book.service;
 
+import com.picky.domain.book.web.dto.BookDTO;
+import com.picky.domain.book.web.dto.BookRequestDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
+  private final RestClient restClient;
 
+  @Value("${google.api.key}")
+  private String googleApiKey;
+
+  public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
+      String keywordQuery = switch (request.getType().toLowerCase()) {
+          case "title" -> "intitle:" + request.getKeyword();
+          case "author" -> "inauthor:" + request.getKeyword();
+          default -> request.getKeyword(); // 전체 검색
+      };
+
+      int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+      int maxResults = pageable.getPageSize();
+
+      String uri = "https://www.googleapis.com/books/v1/volumes"
+              + "?q={query}&startIndex={startIndex}&maxResults={maxResults}&key={apiKey}";
+
+
+      BookResponseDTO response = restClient.get()
+              .uri(uri, keywordQuery, startIndex, maxResults, googleApiKey)
+              .retrieve()
+              .body(BookResponseDTO.class);
+
+      List<BookDTO> dtos = Optional.ofNullable(response)
+              .map(BookResponseDTO::getItems) // response가 null이면 빈 리스트 처리
+              .orElse(Collections.emptyList())
+              .stream()
+              .filter(Objects::nonNull)
+              .map(item -> {
+                  BookResponseDTO.VolumeInfo info = item.getVolumeInfo();
+                  if (info == null) {
+                      return BookDTO.builder()
+                              .authors(Collections.emptyList())
+                              .build();
+                  }
+                  return BookDTO.builder()
+                          .title(info.getTitle())
+                          .authors(info.getAuthors() != null ? info.getAuthors() : Collections.emptyList())
+                          .publisher(info.getPublisher())
+                          .coverImage(info.getImageLinks() != null ? info.getImageLinks().getThumbnail() : null)
+                          .isbn(extractIsbn(info))
+                          .publishedAt(info.getPublishedDate())
+                          .pageCount(info.getPageCount() != null ? info.getPageCount() : 0)
+                          .build();
+              })
+              .collect(Collectors.toList());
+
+      long total = (response != null && response.getTotalItems() != null)
+              ? response.getTotalItems()
+              : dtos.size();
+
+    return new PageImpl<>(dtos, pageable, total);
+  }
+
+    private String extractIsbn(BookResponseDTO.VolumeInfo info) {
+        if (info.getIndustryIdentifiers() == null) return null;
+        return info.getIndustryIdentifiers().stream()
+                .filter(id -> "ISBN_13".equals(id.getType()))
+                .findFirst().map(BookResponseDTO.IndustryIdentifiers::getIdentifier)
+                .orElse(null);
+    }
 }

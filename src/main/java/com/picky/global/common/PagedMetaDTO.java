@@ -19,8 +19,8 @@ public class PagedMetaDTO {
     this.currentPage = currentPage;
     this.pageSize = pageSize;
     this.totalItems = totalItems;
-    this.hasNext = null;
     this.totalPages = (int) Math.ceil((double) totalItems / pageSize);
+    this.hasNext = currentPage < this.totalPages; // DB 페이징 계산
   }
 
   public PagedMetaDTO(boolean hasNext) {
