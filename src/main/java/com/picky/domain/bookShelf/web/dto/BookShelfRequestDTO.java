@@ -9,9 +9,6 @@ import org.springframework.data.domain.Pageable;
 @Schema(description = "내 서재 조회를 위한 요청 객체")
 public class BookShelfRequestDTO {
 
-    @Schema(description = "회원 id", example = "1")
-    public Long memberId;
-
     @Schema(description = "독서 상태 조건", example = "READING", nullable = true)
     public String status = "all";
 

@@ -1,12 +1,14 @@
 package com.picky.domain.bookShelf.service;
 
 import com.picky.domain.book.entity.QBook;
+import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.bookShelf.repository.BookShelfRepository;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
+import com.picky.domain.bookShelf.web.dto.PatchBookShelfRequestDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.entity.QMember;
 import com.picky.domain.member.service.MemberServiceImpl;
@@ -50,7 +52,7 @@ public class BookShelfServiceImpl implements BookShelfService{
         return bookShelfRepository.save(bookShelf);
     }
 
-    public Page<BookShelfResponseDTO> getBookShelf(BookShelfRequestDTO request, Pageable pageable) {
+    public Page<BookShelfResponseDTO> getBookShelf(BookShelfRequestDTO request, Long memberId, Pageable pageable) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
         QMember member = QMember.member;
         QBook book = QBook.book;
@@ -58,10 +60,10 @@ public class BookShelfServiceImpl implements BookShelfService{
         BooleanBuilder builder = new BooleanBuilder()
                 .and(bookShelf.status.eq(DataStatus.ACTIVATED));
 
-        if (request.getMemberId() != null) {
-            Member memberEntity = memberService.findById(request.getMemberId());
+        if (memberId != null) {
+            Member memberEntity = memberService.findById(memberId);
             if (memberEntity == null) throw new NotFoundException(ResponseCode.NOT_FOUND_MEMBER);
-            builder.and(member.id.eq(request.getMemberId()));
+            builder.and(member.id.eq(memberId));
         }
 
         if (request.getStatus() != null) {
@@ -102,4 +104,16 @@ public class BookShelfServiceImpl implements BookShelfService{
         bookShelf.setStatus(DataStatus.DEACTIVATED);
         bookShelfRepository.save(bookShelf);
     }
+
+    @Transactional(readOnly = false)
+    public BookShelfResponseDTO patchBookStatus(Long id, PatchBookShelfRequestDTO request) {
+        BookShelf bookShelf = findById(id);
+
+        bookShelf.setReadingStatus(ReadingStatus.valueOf(request.status));
+        BookShelf savedBookShelf = bookShelfRepository.save(bookShelf);
+
+        // DTO 반환
+        return BookShelfResponseDTO.fromBookShelf(savedBookShelf);
+    }
+
     }

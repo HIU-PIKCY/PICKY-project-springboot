@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 @Schema(description = "책 리스트 DTO")
 public class BookShelfResponseDTO {
 
+    @Schema(description = "id")
+    private Long id;
+
     @Schema(description = "책 정보")
     private BookDTO book;
 
@@ -29,6 +32,7 @@ public class BookShelfResponseDTO {
 
     public static BookShelfResponseDTO fromBookShelf(BookShelf bookShelf) {
         return BookShelfResponseDTO.builder()
+                .id(bookShelf.getId())
                 .book(BookDTO.fromEntity(bookShelf.getBook()))
                 .readingStatus(bookShelf.getReadingStatus())
                 .createdAt(bookShelf.getCreatedAt())
