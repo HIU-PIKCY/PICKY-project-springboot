@@ -1,5 +1,7 @@
 package com.picky.domain.bookShelf.web.controller;
 
+import com.picky.domain.book.web.dto.BookDetailDTO;
+import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
@@ -12,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class BookShelfController {
     private final BookShelfServiceImpl bookShelfService;
 
     @GetMapping()
-    public ResponseEntity<ResponseDTO<List<BookShelfResponseDTO>>> searchBooks(@Valid @ModelAttribute BookShelfRequestDTO request)
+    public ResponseEntity<ResponseDTO<List<BookShelfResponseDTO>>> searchBooks(@Valid @RequestBody BookShelfRequestDTO request)
     {
         Pageable pageable = request.toPageable();
         Page<BookShelfResponseDTO> bookShelfPage = bookShelfService.getBookShelf(request, pageable);
@@ -43,4 +42,11 @@ public class BookShelfController {
                                 bookShelfPage.getTotalElements())
                 ));
     }
+/*
+    @PostMapping()
+    public ResponseEntity<BookDetailDTO> addBook(@Valid @RequestBody AddBookRequestDTO request){
+        BookDetailDTO bookDetailDTO = bookShelfService.addBook(request);
+
+        return ResponseEntity.ok(bookDetailDTO);
+    }*/
 }
