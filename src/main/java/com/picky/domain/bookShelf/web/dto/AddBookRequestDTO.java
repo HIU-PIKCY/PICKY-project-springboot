@@ -12,5 +12,5 @@ public class AddBookRequestDTO {
     public String isbn;
 
     @Schema(description = "독서 상태", example = "READING", nullable = true)
-    public ReadingStatus status = ReadingStatus.READING;
+    public String status = "READING";
 }

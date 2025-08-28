@@ -12,7 +12,7 @@ public class BookShelfRequestDTO {
     @Schema(description = "회원 id", example = "1")
     public Long memberId;
 
-    @Schema(description = "독서 상태 정렬 조건", example = "READING", nullable = true)
+    @Schema(description = "독서 상태 조건", example = "READING", nullable = true)
     public String status = "all";
 
     @Schema(description = "페이지 번호 (1부터 시작)", example = "1")

@@ -34,6 +34,12 @@ public class BookShelfServiceImpl implements BookShelfService{
     private final MemberServiceImpl memberService;
     private final BookShelfRepository bookShelfRepository;
 
+    public BookShelf findById(Long id) {
+        BooleanExpression predicate = QBookShelf.bookShelf.id.eq(id).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
+        Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
+        return bookShelfEntity.orElse(null);
+    }
+
     public BookShelf findByMemberIdAndBookId(Long memberId, String isbn) {
         BooleanExpression predicate = QBookShelf.bookShelf.member.id.eq(memberId).and(QBook.book.isbn.eq(isbn)).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
         Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
@@ -89,4 +95,11 @@ public class BookShelfServiceImpl implements BookShelfService{
         return new PageImpl<>(dtos, pageable, total);
     }
 
+    @Transactional(readOnly = false)
+    public void deleteBookShelf(Long id) {
+        BookShelf bookShelf = findById(id);
+
+        bookShelf.setStatus(DataStatus.DEACTIVATED);
+        bookShelfRepository.save(bookShelf);
+    }
     }

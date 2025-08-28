@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
-import com.picky.domain.bookShelf.service.BookShelfService;
+import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
 import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
 import com.picky.domain.member.entity.Member;
@@ -168,7 +168,7 @@ public class BookServiceImpl implements BookService {
             BookShelf shelf = BookShelf.builder()
                     .book(book)
                     .member(Member.builder().id(memberId).build())
-                    .readingStatus(request.status)
+                    .readingStatus(ReadingStatus.valueOf(request.status))
                     .build();
 
             bookShelfService.save(shelf);
@@ -177,7 +177,7 @@ public class BookServiceImpl implements BookService {
         // DTO 반환
         BookDetailDTO detailDTO = BookDetailDTO.fromEntity(book);
         detailDTO.setIsInLibrary(true);
-        detailDTO.setReadingStatus(request.status);
+        detailDTO.setReadingStatus(ReadingStatus.valueOf(request.status));
 
         return detailDTO;
     }
