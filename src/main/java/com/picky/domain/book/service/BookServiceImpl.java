@@ -1,12 +1,22 @@
 package com.picky.domain.book.service;
 
+import com.picky.domain.book.entity.Book;
+import com.picky.domain.book.entity.QBook;
 import com.picky.domain.book.web.dto.BookDTO;
+import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.picky.domain.bookShelf.entity.BookShelf;
+import com.picky.domain.bookShelf.entity.QBookShelf;
+import com.picky.global.enums.DataStatus;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -21,6 +31,7 @@ import org.springframework.web.client.RestClient;
 @Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
   private final RestClient restClient;
+  private final JPAQueryFactory queryFactory;
 
   @Value("${google.api.key}")
   private String googleApiKey;
@@ -81,5 +92,38 @@ public class BookServiceImpl implements BookService {
                 .filter(id -> "ISBN_13".equals(id.getType()))
                 .findFirst().map(BookResponseDTO.IndustryIdentifiers::getIdentifier)
                 .orElse(null);
+    }
+
+    public BookDetailDTO getBookDetailById(Long bookId, Long memberId) {
+        QBook book = QBook.book;
+        QBookShelf bookShelf = QBookShelf.bookShelf;
+
+        Book bookEntity = queryFactory
+                .selectFrom(book)
+                .where(book.id.eq(bookId))
+                .fetchOne();
+
+        if (bookEntity == null) {
+            return null;
+        }
+
+        // 서재 정보 조회
+        BooleanExpression inLibrary = bookShelf.book.id.eq(bookId)
+                .and(bookShelf.member.id.eq(memberId))
+                .and(bookShelf.status.eq(DataStatus.ACTIVATED));
+
+        BookShelf shelf = queryFactory
+                .selectFrom(bookShelf)
+                .where(inLibrary)
+                .fetchFirst();
+
+        // Entity 기반 DTO 생성
+        BookDetailDTO dto = BookDetailDTO.fromEntity(bookEntity);
+
+        if (shelf != null) {
+            dto.setIsInLibrary(true);
+            dto.setReadingStatus(shelf.getReadingStatus());
+        }
+        return dto;
     }
 }

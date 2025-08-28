@@ -2,11 +2,14 @@ package com.picky.domain.book.web.controller;
 
 import com.picky.domain.book.service.BookServiceImpl;
 import com.picky.domain.book.web.dto.BookDTO;
+import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
-import com.picky.domain.book.web.dto.BookResponseDTO;
+import com.picky.domain.member.entity.Member;
+import com.picky.domain.member.service.MemberServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
 import com.picky.global.common.ResponseDTO;
 import com.picky.global.enums.ResponseCode;
+import com.picky.global.error.NotFoundException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "책")
 public class BookController {
   private final BookServiceImpl bookService;
+  private final MemberServiceImpl memberService;
 
   @GetMapping("/search")
   public ResponseEntity<ResponseDTO<List<BookDTO>>> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
@@ -40,4 +44,15 @@ public class BookController {
                      searchBooksPage.getTotalElements())
      ));
   }
+
+    @GetMapping("/{bookId}")
+    public ResponseEntity<ResponseDTO<BookDetailDTO>> getBookDetail(@PathVariable Long bookId)
+    {
+        Member member = memberService.findById(1L);
+        //todo : 토큰으로부터 member 불러오기
+        BookDetailDTO bookdto = bookService.getBookDetailById(bookId, member.getId());
+        if(bookdto==null) throw new NotFoundException(ResponseCode.NOT_FOUND_BOOK);
+
+        return ResponseEntity.ok(ResponseDTO.success(ResponseCode.SUCCESS, bookdto));
+    }
 }
