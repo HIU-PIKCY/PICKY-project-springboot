@@ -1,5 +1,7 @@
 package com.picky.domain.answer.service;
 
+import com.picky.domain.answer.web.dto.AnswerRequestDTO.AnswerCreateRequestDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswersResponseDTO;
 
 public interface AnswerService {
@@ -11,4 +13,14 @@ public interface AnswerService {
      * @return 사용자가 작성한 답변 목록
      */
     MyAnswersResponseDTO getMyAnswers(Long memberId);
+
+    /**
+     * 특정 질문에 대한 답변을 등록합니다.
+     *
+     * @param questionId 답변을 등록할 질문 ID
+     * @param memberId   답변 작성자 ID
+     * @param request    답변 생성 요청 DTO
+     * @return 생성된 답변 정보
+     */
+    AnswerCreateResponseDTO createAnswer(Long questionId, Long memberId, AnswerCreateRequestDTO request);
 }

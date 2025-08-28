@@ -5,10 +5,10 @@ import lombok.NoArgsConstructor;
 
 public class AnswerRequestDTO {
 
-//    @Getter
-//    @NoArgsConstructor
-//    public static class AnswerCreateRequestDTO {
-//        private String content;
-//    }
-
+    @Getter
+    @NoArgsConstructor
+    public static class AnswerCreateRequestDTO {
+        private String content;
+        private Boolean isAI;
+    }
 }

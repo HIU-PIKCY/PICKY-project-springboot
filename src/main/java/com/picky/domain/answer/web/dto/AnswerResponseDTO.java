@@ -1,5 +1,6 @@
 package com.picky.domain.answer.web.dto;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,16 +9,6 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 public class AnswerResponseDTO {
-
-    //    @Getter
-    //    @NoArgsConstructor
-    //    @AllArgsConstructor
-    //    @Builder
-    //    public static class AnswerCreateResponseDTO {
-    //        private Long answerPk;
-    //        private String content;
-    //        private String createdAt;
-    //    }
 
     @Getter
     @NoArgsConstructor
@@ -37,5 +28,17 @@ public class AnswerResponseDTO {
     @Builder
     public static class MyAnswersResponseDTO {
         private List<MyAnswerDTO> answers;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AnswerCreateResponseDTO {
+        private Long id;
+        private String content;
+        private String author; // 작성자 이름
+        private Boolean isAI;
+        private LocalDateTime createdAt;
     }
 }
