@@ -34,10 +34,6 @@ public class BookShelf extends BaseEntity {
   @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_book_shelf_member"))
   private Member member;
 
-  @Schema(description = "내용", example = "내용")
-  @Column(nullable = false, length = 512)
-  private String content;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   @Builder.Default

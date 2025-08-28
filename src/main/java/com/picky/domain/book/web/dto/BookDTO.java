@@ -1,6 +1,8 @@
 package com.picky.domain.book.web.dto;
 
+import com.picky.domain.book.entity.Book;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,4 +36,16 @@ public class BookDTO {
 
   @Schema(description = "페이지 수", example = "345")
   private Integer pageCount;
+
+    public static BookDTO fromEntity(Book book) {
+        return BookDTO.builder()
+                .title(book.getTitle())
+                .authors(Collections.singletonList(book.getAuthor()))
+                .publisher(book.getPublisher())
+                .coverImage(book.getCoverImage())
+                .isbn(book.getIsbn())
+                .publishedAt(String.valueOf(book.getPublishedAt()))
+                .pageCount(book.getPageCount())
+                .build();
+    }
 }
