@@ -1,8 +1,8 @@
 package com.picky.domain.bookShelf.service;
 
 import com.picky.domain.book.entity.QBook;
-import com.picky.domain.bookShelf.dto.BookListDTO;
-import com.picky.domain.bookShelf.dto.BookListRequestDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
@@ -31,7 +31,7 @@ public class BookShelfServiceImpl implements BookShelfService{
     private final JPAQueryFactory queryFactory;
     private final MemberServiceImpl memberService;
 
-    public Page<BookListDTO> getBookShelf(BookListRequestDTO request, Pageable pageable) {
+    public Page<BookShelfResponseDTO> getBookShelf(BookShelfRequestDTO request, Pageable pageable) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
         QMember member = QMember.member;
         QBook book = QBook.book;
@@ -59,8 +59,8 @@ public class BookShelfServiceImpl implements BookShelfService{
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<BookListDTO> dtos = content.stream()
-                .map(BookListDTO::fromBookShelf)
+        List<BookShelfResponseDTO> dtos = content.stream()
+                .map(BookShelfResponseDTO::fromBookShelf)
                 .toList();
 
         // total count

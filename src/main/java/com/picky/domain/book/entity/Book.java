@@ -40,11 +40,11 @@ public class Book extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String coverImage;
 
-  @Schema(description = "ISBN 값", example = "1346")
+  @Schema(description = "ISBN 값", example = "9791142100956")
   private String isbn;
 
   @Schema(description = "출판 일자", example = "2025-03-12T07:45:20")
-  private LocalDateTime publisedhAt;
+  private LocalDateTime publishedAt;
 
   @Schema(description = "페이지 수", example = "345")
   private Integer pageCount;

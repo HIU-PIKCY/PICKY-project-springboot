@@ -1,7 +1,7 @@
 package com.picky.domain.bookShelf.web.controller;
 
-import com.picky.domain.bookShelf.dto.BookListDTO;
-import com.picky.domain.bookShelf.dto.BookListRequestDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
 import com.picky.global.common.ResponseDTO;
@@ -28,10 +28,10 @@ public class BookShelfController {
     private final BookShelfServiceImpl bookShelfService;
 
     @GetMapping()
-    public ResponseEntity<ResponseDTO<List<BookListDTO>>> searchBooks(@Valid @ModelAttribute BookListRequestDTO request)
+    public ResponseEntity<ResponseDTO<List<BookShelfResponseDTO>>> searchBooks(@Valid @ModelAttribute BookShelfRequestDTO request)
     {
         Pageable pageable = request.toPageable();
-        Page<BookListDTO> bookShelfPage = bookShelfService.getBookShelf(request, pageable);
+        Page<BookShelfResponseDTO> bookShelfPage = bookShelfService.getBookShelf(request, pageable);
 
         return ResponseEntity.ok(
                 ResponseDTO.success(
