@@ -41,4 +41,26 @@ public class AnswerResponseDTO {
         private Boolean isAI;
         private LocalDateTime createdAt;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AnswerListResponseDTO { // 질문별 답변 목록 조회 응답
+        private List<AnswerInfoResponseDTO> answers; // 답변 목록
+        private int totalCount; // 전체 답변 수
+        private boolean hasNext; // 다음 페이지 존재 여부
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AnswerInfoResponseDTO {
+        private Long id;
+        private String content;
+        private String author; // 작성자 이름
+        private Boolean isAI;
+        private LocalDateTime createdAt;
+    }
 }

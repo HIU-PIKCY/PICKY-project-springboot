@@ -2,6 +2,7 @@ package com.picky.domain.answer.service;
 
 import com.picky.domain.answer.web.dto.AnswerRequestDTO.AnswerCreateRequestDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerListResponseDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswersResponseDTO;
 
 public interface AnswerService {
@@ -23,4 +24,12 @@ public interface AnswerService {
      * @return 생성된 답변 정보
      */
     AnswerCreateResponseDTO createAnswer(Long questionId, Long memberId, AnswerCreateRequestDTO request);
+
+    /**
+     * 특정 질문에 대한 모든 답변을 조회합니다.
+     *
+     * @param questionId 조회할 질문 ID
+     * @return 해당 질문에 대한 답변 목록 DTO
+     */
+    AnswerListResponseDTO getAnswersByQuestion(Long questionId);
 }

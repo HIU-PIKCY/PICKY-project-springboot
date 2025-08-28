@@ -6,18 +6,19 @@ import com.picky.domain.answer.entity.Answer;
 import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.answer.web.dto.AnswerRequestDTO.AnswerCreateRequestDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerInfoResponseDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerListResponseDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswerDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswersResponseDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +97,32 @@ public class AnswerServiceImpl implements AnswerService {
                 .author(member.getName())
                 .isAI(savedAnswer.getIsAiGenerated())
                 .createdAt(savedAnswer.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public AnswerListResponseDTO getAnswersByQuestion(Long questionId) {
+
+        questionRepository.findById(questionId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+
+        List<Answer> answers = answerRepository.findByQuestionIdWithMember(questionId);
+
+        List<AnswerInfoResponseDTO> responseDTOs = answers.stream()
+                .map(a -> AnswerInfoResponseDTO.builder()
+                        .id(a.getId())
+                        .content(a.getContent())
+                        .author(a.getMember().getName())
+                        .isAI(a.getIsAiGenerated())
+                        .createdAt(a.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return AnswerListResponseDTO.builder()
+                .answers(responseDTOs)
+                .totalCount(responseDTOs.size())
+                .hasNext(false) // TODO: 추후 페이징 처리 시 변경
                 .build();
     }
 }
