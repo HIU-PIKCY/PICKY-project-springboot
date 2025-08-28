@@ -38,7 +38,7 @@ public class Book extends BaseEntity {
 
   @Schema(description = "책 이미지", example = "https://naver.com/index.png")
   @Column(columnDefinition = "TEXT")
-  private String thumbnail;
+  private String coverImage;
 
   @Schema(description = "ISBN 값", example = "1346")
   private String isbn;
