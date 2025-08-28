@@ -1,6 +1,8 @@
 package com.picky.domain.bookShelf.service;
 
 import com.picky.domain.book.entity.QBook;
+import com.picky.domain.book.web.dto.BookDetailDTO;
+import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
@@ -75,4 +77,7 @@ public class BookShelfServiceImpl implements BookShelfService{
 
         return new PageImpl<>(dtos, pageable, total);
     }
-}
+
+
+
+    }
