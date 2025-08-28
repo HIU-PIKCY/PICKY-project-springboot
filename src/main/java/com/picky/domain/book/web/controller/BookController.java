@@ -45,12 +45,12 @@ public class BookController {
      ));
   }
 
-    @GetMapping("/{bookId}")
-    public ResponseEntity<ResponseDTO<BookDetailDTO>> getBookDetail(@PathVariable Long bookId)
+    @GetMapping("/{isbn}")
+    public ResponseEntity<ResponseDTO<BookDetailDTO>> getBookDetail(@PathVariable String isbn)
     {
         Member member = memberService.findById(1L);
         //todo : 토큰으로부터 member 불러오기
-        BookDetailDTO bookdto = bookService.getBookDetailById(bookId, member.getId());
+        BookDetailDTO bookdto = bookService.getBookDetailByIsbn(isbn, member.getId());
         if(bookdto==null) throw new NotFoundException(ResponseCode.NOT_FOUND_BOOK);
 
         return ResponseEntity.ok(ResponseDTO.success(ResponseCode.SUCCESS, bookdto));

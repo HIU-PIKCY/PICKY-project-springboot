@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
+import com.picky.domain.bookShelf.repository.BookShelfRepository;
 import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,14 +24,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
-  private final RestClient restClient;
+  private final WebClient webClient;
   private final JPAQueryFactory queryFactory;
+  private final GoogleBooksClient googleBooksClient;
 
   @Value("${google.api.key}")
   private String googleApiKey;
@@ -50,10 +51,11 @@ public class BookServiceImpl implements BookService {
               + "?q={query}&startIndex={startIndex}&maxResults={maxResults}&key={apiKey}";
 
 
-      BookResponseDTO response = restClient.get()
+      BookResponseDTO response = webClient.get()
               .uri(uri, keywordQuery, startIndex, maxResults, googleApiKey)
               .retrieve()
-              .body(BookResponseDTO.class);
+              .bodyToMono(BookResponseDTO.class)
+              .block();
 
       List<BookDTO> dtos = Optional.ofNullable(response)
               .map(BookResponseDTO::getItems) // response가 null이면 빈 리스트 처리
@@ -94,21 +96,15 @@ public class BookServiceImpl implements BookService {
                 .orElse(null);
     }
 
-    public BookDetailDTO getBookDetailById(Long bookId, Long memberId) {
-        QBook book = QBook.book;
+    public BookDetailDTO getBookDetailByIsbn(String isbn, Long memberId) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
 
-        Book bookEntity = queryFactory
-                .selectFrom(book)
-                .where(book.id.eq(bookId))
-                .fetchOne();
+            BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(isbn);
+            if (bookDTO == null) {
+                throw new RuntimeException("책 정보를 찾을 수 없습니다.");
+            }
 
-        if (bookEntity == null) {
-            return null;
-        }
-
-        // 서재 정보 조회
-        BooleanExpression inLibrary = bookShelf.book.id.eq(bookId)
+        BooleanExpression inLibrary = bookShelf.book.isbn.eq(isbn)
                 .and(bookShelf.member.id.eq(memberId))
                 .and(bookShelf.status.eq(DataStatus.ACTIVATED));
 
@@ -117,13 +113,12 @@ public class BookServiceImpl implements BookService {
                 .where(inLibrary)
                 .fetchFirst();
 
-        // Entity 기반 DTO 생성
-        BookDetailDTO dto = BookDetailDTO.fromEntity(bookEntity);
-
+        bookDTO.setIsInLibrary(false); // 기본값 설정
         if (shelf != null) {
-            dto.setIsInLibrary(true);
-            dto.setReadingStatus(shelf.getReadingStatus());
+            bookDTO.setIsInLibrary(true);
+            bookDTO.setReadingStatus(shelf.getReadingStatus());
         }
-        return dto;
+
+        return bookDTO;
     }
 }
