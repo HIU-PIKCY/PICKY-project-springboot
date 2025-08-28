@@ -1,8 +1,7 @@
 package com.picky.domain.bookShelf.service;
 
 import com.picky.domain.book.entity.QBook;
-import com.picky.domain.book.web.dto.BookDetailDTO;
-import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
+import com.picky.domain.bookShelf.repository.BookShelfRepository;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
@@ -15,6 +14,7 @@ import com.picky.global.enums.DataStatus;
 import com.picky.global.enums.ResponseCode;
 import com.picky.global.error.NotFoundException;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +32,17 @@ import java.util.Optional;
 public class BookShelfServiceImpl implements BookShelfService{
     private final JPAQueryFactory queryFactory;
     private final MemberServiceImpl memberService;
+    private final BookShelfRepository bookShelfRepository;
+
+    public BookShelf findByMemberIdAndBookId(Long memberId, String isbn) {
+        BooleanExpression predicate = QBookShelf.bookShelf.member.id.eq(memberId).and(QBook.book.isbn.eq(isbn)).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
+        Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
+        return bookShelfEntity.orElse(null);
+    }
+
+    public BookShelf save(BookShelf bookShelf){
+        return bookShelfRepository.save(bookShelf);
+    }
 
     public Page<BookShelfResponseDTO> getBookShelf(BookShelfRequestDTO request, Pageable pageable) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
@@ -77,7 +88,5 @@ public class BookShelfServiceImpl implements BookShelfService{
 
         return new PageImpl<>(dtos, pageable, total);
     }
-
-
 
     }

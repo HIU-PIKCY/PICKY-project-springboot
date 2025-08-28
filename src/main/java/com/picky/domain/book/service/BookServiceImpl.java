@@ -2,19 +2,23 @@ package com.picky.domain.book.service;
 
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.entity.QBook;
+import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
-import com.picky.domain.bookShelf.repository.BookShelfRepository;
+import com.picky.domain.bookShelf.service.BookShelfService;
+import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
+import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
+import com.picky.domain.member.entity.Member;
 import com.picky.global.enums.DataStatus;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +37,21 @@ public class BookServiceImpl implements BookService {
   private final WebClient webClient;
   private final JPAQueryFactory queryFactory;
   private final GoogleBooksClient googleBooksClient;
+  private final BookRepository bookRepository;
+    private final BookShelfServiceImpl bookShelfService;
 
-  @Value("${google.api.key}")
+    public Book findByIsbn(String isbn) {
+        BooleanExpression predicate = QBook.book.isbn.eq(isbn).and(QBook.book.status.eq(DataStatus.ACTIVATED));
+        Optional<Book> bookEntity = bookRepository.findOne(predicate);
+        return bookEntity.orElse(null);
+    }
+
+    public Book save(Book book){
+        return bookRepository.save(book);
+    }
+
+
+    @Value("${google.api.key}")
   private String googleApiKey;
 
   public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
@@ -120,5 +137,48 @@ public class BookServiceImpl implements BookService {
         }
 
         return bookDTO;
+    }
+
+    @Transactional(readOnly = false)
+    public BookDetailDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId) {
+        BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(request.isbn);
+
+        Book book = findByIsbn(request.getIsbn());
+        if (book == null) {
+            // 새 책 생성
+            book = Book.builder()
+                    .isbn(bookDTO.getIsbn())
+                    .title(bookDTO.getTitle())
+                    .author(bookDTO.getAuthors() != null && !bookDTO.getAuthors().isEmpty()
+                            ? bookDTO.getAuthors().get(0)
+                            : null)
+                    .publisher(bookDTO.getPublisher())
+                    .coverImage(bookDTO.getCoverImage())
+                    .publishedAt(LocalDate.parse(bookDTO.getPublishedAt()).atStartOfDay())
+                    .pageCount(bookDTO.getPageCount())
+                    .build();
+
+            book = save(book);
+        }
+
+        // BookShelf에 추가 여부 확인
+        BookShelf existingShelf = bookShelfService.findByMemberIdAndBookId(memberId, request.isbn);
+        if (existingShelf == null) {
+            // 새 서재 엔티티 생성
+            BookShelf shelf = BookShelf.builder()
+                    .book(book)
+                    .member(Member.builder().id(memberId).build())
+                    .readingStatus(request.status)
+                    .build();
+
+            bookShelfService.save(shelf);
+        }
+
+        // DTO 반환
+        BookDetailDTO detailDTO = BookDetailDTO.fromEntity(book);
+        detailDTO.setIsInLibrary(true);
+        detailDTO.setReadingStatus(request.status);
+
+        return detailDTO;
     }
 }

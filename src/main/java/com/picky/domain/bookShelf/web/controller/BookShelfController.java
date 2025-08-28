@@ -5,6 +5,8 @@ import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
+import com.picky.domain.member.entity.Member;
+import com.picky.domain.member.service.MemberServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
 import com.picky.global.common.ResponseDTO;
 import com.picky.global.enums.ResponseCode;
@@ -42,11 +44,5 @@ public class BookShelfController {
                                 bookShelfPage.getTotalElements())
                 ));
     }
-/*
-    @PostMapping()
-    public ResponseEntity<BookDetailDTO> addBook(@Valid @RequestBody AddBookRequestDTO request){
-        BookDetailDTO bookDetailDTO = bookShelfService.addBook(request);
 
-        return ResponseEntity.ok(bookDetailDTO);
-    }*/
 }

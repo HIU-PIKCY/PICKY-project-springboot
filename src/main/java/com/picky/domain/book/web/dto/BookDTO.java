@@ -28,7 +28,7 @@ public class BookDTO {
   @Schema(description = "책 이미지", example = "https://naver.com/index.png")
   private String coverImage;
 
-  @Schema(description = "ISBN 값", example = "13461112456")
+  @Schema(description = "ISBN 값", example = "9788934986225")
   private String isbn;
 
   @Schema(description = "출판 일자", example = "2025-03-12T07:45:20")
