@@ -1,6 +1,5 @@
 package com.picky.domain.bookShelf.web.dto;
 
-import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;

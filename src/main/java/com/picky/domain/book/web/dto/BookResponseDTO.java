@@ -3,7 +3,6 @@ package com.picky.domain.book.web.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

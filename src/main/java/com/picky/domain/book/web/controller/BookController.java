@@ -4,6 +4,7 @@ import com.picky.domain.book.service.BookServiceImpl;
 import com.picky.domain.book.web.dto.BookDTO;
 import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
+import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.service.MemberServiceImpl;
 import com.picky.global.common.PagedMetaDTO;
@@ -54,5 +55,14 @@ public class BookController {
         if(bookdto==null) throw new NotFoundException(ResponseCode.NOT_FOUND_BOOK);
 
         return ResponseEntity.ok(ResponseDTO.success(ResponseCode.SUCCESS, bookdto));
+    }
+
+    @PostMapping()
+    public ResponseEntity<BookDetailDTO> saveBookByIsbn(@Valid @RequestBody AddBookRequestDTO request){
+        Member member = memberService.findById(1L);
+        //todo : 토큰으로부터 member 불러오기
+        BookDetailDTO bookDetailDTO = bookService.saveBookByIsbn(request, member.getId());
+
+        return ResponseEntity.ok(bookDetailDTO);
     }
 }
