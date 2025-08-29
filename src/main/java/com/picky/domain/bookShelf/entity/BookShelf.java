@@ -4,7 +4,6 @@ import com.picky.domain.book.entity.Book;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import com.picky.domain.member.entity.Member;
 import com.picky.global.entity.BaseEntity;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

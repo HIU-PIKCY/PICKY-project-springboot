@@ -1,20 +1,19 @@
 package com.picky.domain.bookShelf.service;
 
+import com.picky.apiPayload.code.status.ErrorStatus;
+import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.book.entity.QBook;
-import com.picky.domain.book.web.dto.BookDetailDTO;
 import com.picky.domain.bookShelf.repository.BookShelfRepository;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
-import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.GetBookShelfRequestDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
-import com.picky.domain.bookShelf.web.dto.PatchBookShelfRequestDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.PatchBookShelfRequestDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.entity.QMember;
 import com.picky.domain.member.service.MemberServiceImpl;
 import com.picky.global.enums.DataStatus;
-import com.picky.global.enums.ResponseCode;
-import com.picky.global.error.NotFoundException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -36,23 +35,27 @@ public class BookShelfServiceImpl implements BookShelfService{
     private final MemberServiceImpl memberService;
     private final BookShelfRepository bookShelfRepository;
 
+    @Override
     public BookShelf findById(Long id) {
         BooleanExpression predicate = QBookShelf.bookShelf.id.eq(id).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
         Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
         return bookShelfEntity.orElse(null);
     }
 
+    @Override
     public BookShelf findByMemberIdAndBookId(Long memberId, String isbn) {
         BooleanExpression predicate = QBookShelf.bookShelf.member.id.eq(memberId).and(QBook.book.isbn.eq(isbn)).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
         Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
         return bookShelfEntity.orElse(null);
     }
 
+    @Override
     public BookShelf save(BookShelf bookShelf){
         return bookShelfRepository.save(bookShelf);
     }
 
-    public Page<BookShelfResponseDTO> getBookShelf(BookShelfRequestDTO request, Long memberId, Pageable pageable) {
+    @Override
+    public Page<BookShelfResponseDTO> getBookShelf(GetBookShelfRequestDTO request, Long memberId, Pageable pageable) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
         QMember member = QMember.member;
         QBook book = QBook.book;
@@ -62,13 +65,17 @@ public class BookShelfServiceImpl implements BookShelfService{
 
         if (memberId != null) {
             Member memberEntity = memberService.findById(memberId);
-            if (memberEntity == null) throw new NotFoundException(ResponseCode.NOT_FOUND_MEMBER);
+            if (memberEntity == null) throw new GeneralException(ErrorStatus.MEMBER_NOT_FOUND);
             builder.and(member.id.eq(memberId));
         }
 
-        if (request.getStatus() != null) {
-            builder.and(bookShelf.readingStatus.eq(ReadingStatus.valueOf(request.getStatus())));
+        if (!"ALL".equalsIgnoreCase(request.getStatus())) {
+            System.out.println("Status: '" + request.getStatus() + "'");
+            builder.and(bookShelf.readingStatus.eq(
+                    ReadingStatus.valueOf(request.getStatus().toUpperCase())
+            ));
         }
+
         // content
         List<BookShelf> content = queryFactory
                 .selectFrom(bookShelf)
@@ -97,6 +104,7 @@ public class BookShelfServiceImpl implements BookShelfService{
         return new PageImpl<>(dtos, pageable, total);
     }
 
+    @Override
     @Transactional(readOnly = false)
     public void deleteBookShelf(Long id) {
         BookShelf bookShelf = findById(id);
@@ -105,6 +113,7 @@ public class BookShelfServiceImpl implements BookShelfService{
         bookShelfRepository.save(bookShelf);
     }
 
+    @Override
     @Transactional(readOnly = false)
     public BookShelfResponseDTO patchBookStatus(Long id, PatchBookShelfRequestDTO request) {
         BookShelf bookShelf = findById(id);

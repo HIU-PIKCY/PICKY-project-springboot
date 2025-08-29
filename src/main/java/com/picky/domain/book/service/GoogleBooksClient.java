@@ -1,6 +1,6 @@
 package com.picky.domain.book.service;
 
-import com.picky.domain.book.web.dto.BookDetailDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;

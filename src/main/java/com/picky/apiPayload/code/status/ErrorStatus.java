@@ -21,6 +21,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 책
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_404", "해당 책을 찾을 수 없습니다."),
+    ALREADY_ADDED(HttpStatus.BAD_REQUEST, "BOOK_400", "이미 내 서재에 추가한 책입니다."),
+
+    // 내 서재
+    BOOKSHELF_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_404", "해당 서재에 추가된 책을 찾을 수 없습니다."),
 
     // 멤버
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "해당 멤버를 찾을 수 없습니다."),

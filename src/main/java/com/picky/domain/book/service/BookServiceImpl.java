@@ -1,10 +1,12 @@
 package com.picky.domain.book.service;
 
+import com.picky.apiPayload.code.status.ErrorStatus;
+import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.entity.QBook;
 import com.picky.domain.book.repository.BookRepository;
-import com.picky.domain.book.web.dto.BookDTO;
-import com.picky.domain.book.web.dto.BookDetailDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
 
@@ -16,7 +18,7 @@ import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.QBookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import com.picky.domain.bookShelf.service.BookShelfServiceImpl;
-import com.picky.domain.bookShelf.web.dto.AddBookRequestDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.AddBookRequestDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -40,12 +42,14 @@ public class BookServiceImpl implements BookService {
   private final BookRepository bookRepository;
     private final BookShelfServiceImpl bookShelfService;
 
+    @Override
     public Book findByIsbn(String isbn) {
         BooleanExpression predicate = QBook.book.isbn.eq(isbn).and(QBook.book.status.eq(DataStatus.ACTIVATED));
         Optional<Book> bookEntity = bookRepository.findOne(predicate);
         return bookEntity.orElse(null);
     }
 
+    @Override
     public Book save(Book book){
         return bookRepository.save(book);
     }
@@ -54,11 +58,13 @@ public class BookServiceImpl implements BookService {
     @Value("${google.api.key}")
   private String googleApiKey;
 
-  public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
-      String keywordQuery = switch (request.getType().toLowerCase()) {
+    @Override
+    public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
+      String keywordQuery = switch (request.getType().toLowerCase()
+              ) {
           case "title" -> "intitle:" + request.getKeyword();
           case "author" -> "inauthor:" + request.getKeyword();
-          default -> request.getKeyword(); // 전체 검색
+          default -> "intitle:" + request.getKeyword() + "+inauthor:" + request.getKeyword();
       };
 
       int startIndex = pageable.getPageNumber() * pageable.getPageSize();
@@ -113,12 +119,13 @@ public class BookServiceImpl implements BookService {
                 .orElse(null);
     }
 
+    @Override
     public BookDetailDTO getBookDetailByIsbn(String isbn, Long memberId) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
 
             BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(isbn);
             if (bookDTO == null) {
-                throw new RuntimeException("책 정보를 찾을 수 없습니다.");
+                throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
             }
 
         BooleanExpression inLibrary = bookShelf.book.isbn.eq(isbn)
@@ -140,6 +147,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional(readOnly = false)
+    @Override
     public BookDetailDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId) {
         BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(request.isbn);
 
@@ -163,7 +171,10 @@ public class BookServiceImpl implements BookService {
 
         // BookShelf에 추가 여부 확인
         BookShelf existingShelf = bookShelfService.findByMemberIdAndBookId(memberId, request.isbn);
-        if (existingShelf == null) {
+
+        if (existingShelf != null) {
+            throw new GeneralException(ErrorStatus.ALREADY_ADDED);
+        }
             // 새 서재 엔티티 생성
             BookShelf shelf = BookShelf.builder()
                     .book(book)
@@ -172,7 +183,6 @@ public class BookServiceImpl implements BookService {
                     .build();
 
             bookShelfService.save(shelf);
-        }
 
         // DTO 반환
         BookDetailDTO detailDTO = BookDetailDTO.fromEntity(book);

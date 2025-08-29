@@ -11,6 +11,4 @@ import java.util.Optional;
 @Repository
 public interface BookShelfRepository extends JpaRepository<BookShelf, Long>,
     QuerydslPredicateExecutor<BookShelf> {
-    Optional<BookShelf> findByMemberIdAndBookIdAndStatus(Long memberId, Long bookId, DataStatus status);
-
 }
