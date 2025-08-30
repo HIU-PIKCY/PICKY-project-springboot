@@ -1,6 +1,6 @@
 package com.picky.domain.bookShelf.web.dto;
 
-import com.picky.domain.book.web.dto.BookDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

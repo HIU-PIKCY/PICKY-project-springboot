@@ -14,7 +14,7 @@ public class BookRequestDTO {
     @Schema(description = "검색 키워드", example = "동물")
     public String keyword;
 
-    @Schema(description = "검색 타입, 옵셔널", example = "title", nullable = true)
+    @Schema(description = "검색 타입, 기본은 전체 검색", example = "title")
     public String type = "all";
 
     @Schema(description = "페이지 번호 (1부터 시작)", example = "1")

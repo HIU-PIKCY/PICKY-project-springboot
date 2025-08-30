@@ -5,13 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.picky.apiPayload.code.BaseCode;
 import com.picky.apiPayload.code.status.SuccessStatus;
+import com.picky.global.common.PagedMetaDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
-@JsonPropertyOrder({"isSuccess", "code", "message", "result"})
+@JsonPropertyOrder({"isSuccess", "code", "message", "result", "meta"})
 public class ApiResponse<T> {
 
     @JsonProperty("isSuccess")
@@ -20,37 +23,50 @@ public class ApiResponse<T> {
     private final String message;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
+    private PagedMetaDTO meta;
 
 
     // 성공한 경우 응답 생성
     public static <T> ApiResponse<T> onSuccess(T result){
-        return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result);
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result, null);
+    }
+
+    public static <T> ApiResponse<T> onSuccess(T result, PagedMetaDTO meta){
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), result, meta);
+    }
+
+    public static <T> ApiResponse<List<T>> onSuccess(List<T> resultList, PagedMetaDTO meta){
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode() , SuccessStatus._OK.getMessage(), resultList, meta);
     }
 
     public static <T> ApiResponse<T> onSuccess(String message, T data) {
-        return new ApiResponse<>(true, SuccessStatus._OK.getCode(), message, data);
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode(), message, data, null);
+    }
+
+    public static <T> ApiResponse<T> onSuccess(String message, T data, PagedMetaDTO meta) {
+        return new ApiResponse<>(true, SuccessStatus._OK.getCode(), message, data, meta);
     }
 
     public static <T> ApiResponse<T> of(BaseCode code, T result){
-            return new ApiResponse<>(true, code.getReasonHttpStatus().getCode() , code.getReasonHttpStatus().getMessage(), result);
+            return new ApiResponse<>(true, code.getReasonHttpStatus().getCode() , code.getReasonHttpStatus().getMessage(), result, null);
     }
 
 
     // 실패한 경우 응답 생성
     public static <T> ApiResponse<T> onFailure(String code, T data) {
-        return new ApiResponse<>(false, code, "요청 처리 중 오류가 발생했습니다.", data);
+        return new ApiResponse<>(false, code, "요청 처리 중 오류가 발생했습니다.", data, null);
     }
 
     public static <T> ApiResponse<T> onFailure(String code, String message, T data){
-        return new ApiResponse<>(false, code, message, data);
+        return new ApiResponse<>(false, code, message, data, null);
     }
 
     public static ResponseEntity<ApiResponse> onSuccess(SuccessStatus status, Object result) {
         return ResponseEntity.ok(
-                new ApiResponse(true, status.getCode(), status.getMessage(), result));
+                new ApiResponse(true, status.getCode(), status.getMessage(), result, null));
     }
 
     public static <T> ApiResponse<T> onSuccess(String code, String message, T data) {
-        return new ApiResponse<>(true, code, message, data);
+        return new ApiResponse<>(true, code, message, data, null);
     }
 }

@@ -18,6 +18,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Override
     public Member findById(Long id) {
         BooleanExpression predicate = QMember.member.id.eq(id).and(QMember.member.status.eq(DataStatus.ACTIVATED));
         Optional<Member> memberEntity = memberRepository.findOne(predicate);
