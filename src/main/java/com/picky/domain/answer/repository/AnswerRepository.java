@@ -22,4 +22,10 @@ public interface AnswerRepository extends JpaRepository<Answer, Long>,
             "WHERE a.member.id = :memberId " +
             "ORDER BY a.createdAt DESC")
     List<Answer> findByMemberIdWithQuestionAndBook(@Param("memberId") Long memberId);
+
+    @Query("SELECT DISTINCT a FROM Answer a " +
+        "JOIN FETCH a.member m " +
+        "WHERE a.question.id = :questionId " +
+        "ORDER BY a.createdAt DESC")
+    List<Answer> findByQuestionIdWithMember(@Param("questionId") Long questionId);
 }
