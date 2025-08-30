@@ -34,7 +34,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 질문 좋아요
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "QUESTION_LIKE_401", "이미 좋아요를 눌렀습니다."),
-    QUESTION_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_LIKE_404", "해당 질문 좋아요를 찾을 수 없습니다.");
+    QUESTION_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_LIKE_404", "해당 질문 좋아요를 찾을 수 없습니다."),
+
+    // 답변
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "ANSWER_404", "해당 답변을 찾을 수 없습니다."),
+    INVALID_PARENT_ANSWER(HttpStatus.BAD_REQUEST, "ANSWER_400", "부모 답변이 유효하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

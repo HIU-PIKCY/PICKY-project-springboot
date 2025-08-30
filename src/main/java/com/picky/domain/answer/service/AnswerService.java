@@ -31,5 +31,5 @@ public interface AnswerService {
      * @param questionId 조회할 질문 ID
      * @return 해당 질문에 대한 답변 목록 DTO
      */
-    AnswerListResponseDTO getAnswersByQuestion(Long questionId);
+    AnswerListResponseDTO getAnswersByQuestion(Long questionId, String sort);
 }
