@@ -17,9 +17,9 @@ spring:
         use_sql_comments: true
         hbm2ddl:
           auto: update
-google:
+aladin:
   api:
-    key: ${GOOGLE_API_KEY}
+    key: ${ALADIN_API_KEY}
 #naver:
 #  client:
 #    id: "네이버ClientId"
