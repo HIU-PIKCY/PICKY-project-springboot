@@ -16,8 +16,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Schema(description = "책 응답 DTO")
 public class BookResponseDTO{
-    private Long totalItems;
-    private List<Volume> items;
+    private Integer totalResults;
+    private List<Item> item;
 
     @Getter
     @Setter
@@ -44,9 +44,6 @@ public class BookResponseDTO{
         @Schema(description = "출판 일자", example = "2025-03-12T07:45:20")
         private String publishedAt;
 
-        @Schema(description = "페이지 수", example = "345")
-        private Integer pageCount;
-
         public static BookDTO fromEntity(Book book) {
             return BookDTO.builder()
                     .title(book.getTitle())
@@ -55,9 +52,18 @@ public class BookResponseDTO{
                     .coverImage(book.getCoverImage())
                     .isbn(book.getIsbn())
                     .publishedAt(String.valueOf(book.getPublishedAt()))
-                    .pageCount(book.getPageCount())
                     .build();
         }
+    }
+
+    @Data
+    public static class Item {
+        private String title;
+        private String author;
+        private String publisher;
+        private String cover;
+        private String isbn13;
+        private String pubDate;
     }
 
     @Getter
@@ -66,6 +72,9 @@ public class BookResponseDTO{
     @AllArgsConstructor
     @Schema(description = "책 상세 DTO")
     public static class BookDetailDTO extends BookDTO {
+
+        @Schema(description = "페이지 수", example = "345")
+        private Integer pageCount;
 
         @Schema(description = "책이 서재에 추가되어 있는지 여부", example = "true")
         private Boolean isInLibrary = false;
@@ -85,41 +94,4 @@ public class BookResponseDTO{
                     .build();
         }
     }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class Volume {
-        private VolumeInfo volumeInfo;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class VolumeInfo {
-        private String title;
-        private List<String> authors;
-        private String publisher;
-        private String publishedDate;
-        private ImageLinks imageLinks;
-        private Integer pageCount;  // 총 페이지 수
-        private List<IndustryIdentifiers> industryIdentifiers;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class ImageLinks {
-        private String smallThumbnail;
-        private String thumbnail;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class IndustryIdentifiers {
-        private String type;
-        private String identifier;
-    }
-
 }

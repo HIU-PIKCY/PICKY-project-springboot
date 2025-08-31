@@ -55,69 +55,50 @@ public class BookServiceImpl implements BookService {
     }
 
 
-    @Value("${google.api.key}")
-  private String googleApiKey;
+    @Value("${aladin.api.key}")
+  private String aladinApiKey;
 
     @Override
     public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
-      String keywordQuery = switch (request.getType().toLowerCase()
-              ) {
-          case "title" -> "intitle:" + request.getKeyword();
-          case "author" -> "inauthor:" + request.getKeyword();
-          default -> "intitle:" + request.getKeyword() + "+inauthor:" + request.getKeyword();
-      };
+        String queryType = switch (request.getType().toLowerCase()) {
+            case "title" -> "Title";
+            case "author" -> "Author";
+            default -> "Keyword";
+        };
 
-      int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+      int startIndex = pageable.getPageNumber() * pageable.getPageSize() + 1;
       int maxResults = pageable.getPageSize();
 
-      String uri = "https://www.googleapis.com/books/v1/volumes"
-              + "?q={query}&startIndex={startIndex}&maxResults={maxResults}&key={apiKey}";
+        String uri = "https://www.aladin.co.kr/ttb/api/ItemSearch.aspx"
+                + "?ttbkey={apiKey}&Query={query}&QueryType={type}&MaxResults={maxResults}&start={start}&SearchTarget=Book&output=js"+"&Version=20131101"+ "&Sort=SalesPoint";
 
-
-      BookResponseDTO response = webClient.get()
-              .uri(uri, keywordQuery, startIndex, maxResults, googleApiKey)
-              .retrieve()
-              .bodyToMono(BookResponseDTO.class)
-              .block();
+        BookResponseDTO response = webClient.get()
+                .uri(uri, aladinApiKey, request.getKeyword(), queryType, maxResults, startIndex)
+                .retrieve()
+                .bodyToMono(BookResponseDTO.class)
+                .block();
 
       List<BookDTO> dtos = Optional.ofNullable(response)
-              .map(BookResponseDTO::getItems) // response가 null이면 빈 리스트 처리
+              .map(BookResponseDTO::getItem) // response가 null이면 빈 리스트 처리
               .orElse(Collections.emptyList())
               .stream()
               .filter(Objects::nonNull)
-              .map(item -> {
-                  BookResponseDTO.VolumeInfo info = item.getVolumeInfo();
-                  if (info == null) {
-                      return BookDTO.builder()
-                              .authors(Collections.emptyList())
-                              .build();
-                  }
-                  return BookDTO.builder()
-                          .title(info.getTitle())
-                          .authors(info.getAuthors() != null ? info.getAuthors() : Collections.emptyList())
-                          .publisher(info.getPublisher())
-                          .coverImage(info.getImageLinks() != null ? info.getImageLinks().getThumbnail() : null)
-                          .isbn(extractIsbn(info))
-                          .publishedAt(info.getPublishedDate())
-                          .pageCount(info.getPageCount() != null ? info.getPageCount() : 0)
-                          .build();
-              })
+              .map(item -> BookDTO.builder()
+                          .title(item.getTitle())
+                      .authors(item.getAuthor() != null ? List.of(item.getAuthor().split(",")) : Collections.emptyList())
+                          .publisher(item.getPublisher())
+                          .coverImage(item.getCover())
+                          .isbn(item.getIsbn13())
+                          .publishedAt(item.getPubDate())
+                          .build())
               .collect(Collectors.toList());
 
-      long total = (response != null && response.getTotalItems() != null)
-              ? response.getTotalItems()
+      long total = (response != null && response.getTotalResults() != null)
+              ? response.getTotalResults()
               : dtos.size();
 
     return new PageImpl<>(dtos, pageable, total);
   }
-
-    private String extractIsbn(BookResponseDTO.VolumeInfo info) {
-        if (info.getIndustryIdentifiers() == null) return null;
-        return info.getIndustryIdentifiers().stream()
-                .filter(id -> "ISBN_13".equals(id.getType()))
-                .findFirst().map(BookResponseDTO.IndustryIdentifiers::getIdentifier)
-                .orElse(null);
-    }
 
     @Override
     public BookDetailDTO getBookDetailByIsbn(String isbn, Long memberId) {
