@@ -32,4 +32,12 @@ public interface AnswerService {
      * @return 해당 질문에 대한 답변 목록 DTO
      */
     AnswerListResponseDTO getAnswersByQuestion(Long questionId, String sort);
+
+    /**
+     * 특정 답변을 삭제합니다.
+     *
+     * @param answerId 삭제할 답변 ID
+     * @param memberId 요청을 수행하는 사용자 ID
+     */
+    void deleteAnswer(Long answerId, Long memberId);
 }

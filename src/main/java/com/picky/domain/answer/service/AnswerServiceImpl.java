@@ -168,4 +168,17 @@ public class AnswerServiceImpl implements AnswerService {
                 .childrenAnswers(Collections.emptyList())
                 .build();
     }
+
+    @Transactional
+    @Override
+    public void deleteAnswer(Long answerId, Long memberId) {
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.ANSWER_NOT_FOUND));
+
+        if (!answer.getMember().getId().equals(memberId)) { // 자기가 작성한 댓글/대댓글만 삭제 가능
+            throw new GeneralException(ErrorStatus.NOT_ANSWER_AUTHOR);
+        }
+
+        answerRepository.delete(answer);
+    }
 }
