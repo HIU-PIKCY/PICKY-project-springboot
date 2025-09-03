@@ -192,8 +192,6 @@ public class QuestionServiceImpl implements QuestionService {
 
         return QuestionListResponseDTO.builder()
             .questions(questionInfoResponseDTOs)
-            .totalCount(questionInfoResponseDTOs.size())
-            .hasMore(false) // TODO: 추후 페이징 한다면 처리
             .build();
     }
 }

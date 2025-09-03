@@ -14,8 +14,12 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +36,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public MyAnswersResponseDTO getMyAnswers(Long memberId) {
         // 멤버 존재 확인
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         // 해당 멤버가 작성한 답변들을 조회 (질문 및 책 정보 포함)
@@ -82,11 +86,22 @@ public class AnswerServiceImpl implements AnswerService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
+        Answer parentAnswer = null;
+        if (request.getParentAnswerId() != null) { // 부모 댓글이 있다면 -> 대댓글을 작성하겠단 뜻!
+            parentAnswer = answerRepository.findById(request.getParentAnswerId())
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.ANSWER_NOT_FOUND));
+
+            if (parentAnswer.getParentAnswer() != null) {
+                throw new GeneralException(ErrorStatus.INVALID_PARENT_ANSWER);
+            }
+        }
+
         Answer answer = Answer.builder()
                 .content(request.getContent())
                 .isAiGenerated(request.getIsAI())
                 .member(member)
                 .question(question)
+                .parentAnswer(parentAnswer) // 부모 답변 설정
                 .build();
 
         Answer savedAnswer = answerRepository.save(answer);
@@ -101,28 +116,56 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public AnswerListResponseDTO getAnswersByQuestion(Long questionId) {
+    public AnswerListResponseDTO getAnswersByQuestion(Long questionId, String sort) {
 
         questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
-
         List<Answer> answers = answerRepository.findByQuestionIdWithMember(questionId);
 
-        List<AnswerInfoResponseDTO> responseDTOs = answers.stream()
-                .map(a -> AnswerInfoResponseDTO.builder()
-                        .id(a.getId())
-                        .content(a.getContent())
-                        .author(a.getMember().getName())
-                        .isAI(a.getIsAiGenerated())
-                        .createdAt(a.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
+        Map<Long, List<AnswerInfoResponseDTO>> childrenMap = answers.stream()
+            .filter(a -> a.getParentAnswer() != null) // 이건 전부 대댓글
+            .collect(Collectors.groupingBy(
+                a -> a.getParentAnswer().getId(), // 부모 댓글 id 기준으로 묶기
+                Collectors.mapping(this::convertToAnswerInfoDTO, Collectors.toList())
+            ));
+
+        // 부모 댓글만 필터링
+        Stream<Answer> parentStream = answers.stream()
+                                             .filter(a -> a.getParentAnswer() == null);
+
+        if ("latest".equalsIgnoreCase(sort)) {
+            parentStream = parentStream.sorted(Comparator.comparing(Answer::getCreatedAt).reversed());
+        } else if ("oldest".equalsIgnoreCase(sort)) {
+            parentStream = parentStream.sorted(Comparator.comparing(Answer::getCreatedAt));
+        }
+
+        // DTO 변환
+        List<AnswerInfoResponseDTO> responseDTOs = parentStream
+            .map(parent -> AnswerInfoResponseDTO.builder()
+                                                .id(parent.getId())
+                                                .content(parent.getContent())
+                                                .author(parent.getMember().getName())
+                                                .isAI(parent.getIsAiGenerated())
+                                                .createdAt(parent.getCreatedAt())
+                                                .childrenAnswers(childrenMap.getOrDefault(parent.getId(), Collections.emptyList())) // 대댓글은 항상 오래된순
+                                                .build()
+            )
+            .collect(Collectors.toList());
 
         return AnswerListResponseDTO.builder()
                 .answers(responseDTOs)
-                .totalCount(responseDTOs.size())
-                .hasNext(false) // TODO: 추후 페이징 처리 시 변경
+                .build();
+    }
+
+    private AnswerInfoResponseDTO convertToAnswerInfoDTO(Answer answer) {
+        return AnswerInfoResponseDTO.builder()
+                .id(answer.getId())
+                .content(answer.getContent())
+                .author(answer.getMember().getName())
+                .isAI(answer.getIsAiGenerated())
+                .createdAt(answer.getCreatedAt())
+                .childrenAnswers(Collections.emptyList())
                 .build();
     }
 }

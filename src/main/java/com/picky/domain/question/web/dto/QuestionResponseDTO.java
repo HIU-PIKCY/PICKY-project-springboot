@@ -57,8 +57,6 @@ public class QuestionResponseDTO {
     @Builder
     public static class QuestionListResponseDTO { // 질문 목록 응답 DTO
         private List<QuestionInfoResponseDTO> questions; // 질문 목록
-        private int totalCount; // 전체 질문 수
-        private boolean hasMore; // 추가 데이터 존재 여부
     }
 
     @Getter

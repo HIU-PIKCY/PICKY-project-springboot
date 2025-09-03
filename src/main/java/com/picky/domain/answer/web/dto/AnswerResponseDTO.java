@@ -1,5 +1,6 @@
 package com.picky.domain.answer.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,8 +49,6 @@ public class AnswerResponseDTO {
     @Builder
     public static class AnswerListResponseDTO { // 질문별 답변 목록 조회 응답
         private List<AnswerInfoResponseDTO> answers; // 답변 목록
-        private int totalCount; // 전체 답변 수
-        private boolean hasNext; // 다음 페이지 존재 여부
     }
 
     @Getter
@@ -62,5 +61,7 @@ public class AnswerResponseDTO {
         private String author; // 작성자 이름
         private Boolean isAI;
         private LocalDateTime createdAt;
+        @Schema(description = "대댓글 목록")
+        private List<AnswerInfoResponseDTO> childrenAnswers; // 대댓글 목록
     }
 }

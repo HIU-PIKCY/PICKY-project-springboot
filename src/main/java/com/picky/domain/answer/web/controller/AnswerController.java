@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,7 +47,7 @@ public class AnswerController {
 
     @Operation(summary = "질문별 답변 조회 API", description = "특정 질문에 대한 모든 답변을 조회합니다.")
     @GetMapping("/questions/{questionId}/answers")
-    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId) {
-        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId));
+    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @Parameter(description = "정렬 기준 (latest: 최신순, oldest: 오래된 순)", required = false) @RequestParam(defaultValue = "oldest") String sort) {
+        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, sort));
     }
 }
