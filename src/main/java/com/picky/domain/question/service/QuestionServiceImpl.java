@@ -194,4 +194,17 @@ public class QuestionServiceImpl implements QuestionService {
             .questions(questionInfoResponseDTOs)
             .build();
     }
+
+    @Transactional
+    @Override
+    public void deleteQuestion(Long questionId, Long memberId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        if (!question.getMember().getId().equals(memberId)) { // 질문 작성자만 삭제 가능
+            throw new GeneralException(ErrorStatus.NOT_QUESTION_AUTHOR);
+        }
+
+        questionRepository.delete(question);
+    }
 }

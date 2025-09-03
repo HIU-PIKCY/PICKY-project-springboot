@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,5 +55,15 @@ public class QuestionController {
             @Parameter(description = "조회할 사용자 ID", example = "1")
             @PathVariable Long memberId) {
         return ApiResponse.onSuccess(questionService.getMyQuestions(memberId));
+    }
+
+    @Operation(summary = "질문 삭제 API", description = "특정 질문을 삭제합니다.")
+    @DeleteMapping("/questions/{questionId}/{memberId}")
+    public ApiResponse<String> deleteQuestion(
+            @PathVariable Long questionId,
+            @PathVariable Long memberId
+    ) {
+        questionService.deleteQuestion(questionId, memberId);
+        return ApiResponse.onSuccess("질문이 성공적으로 삭제되었습니다.");
     }
 }

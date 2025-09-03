@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,5 +50,15 @@ public class AnswerController {
     @GetMapping("/questions/{questionId}/answers")
     public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @Parameter(description = "정렬 기준 (latest: 최신순, oldest: 오래된 순)", required = false) @RequestParam(defaultValue = "oldest") String sort) {
         return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, sort));
+    }
+
+    @Operation(summary = "답변 삭제 API", description = "특정 답변을 삭제합니다.")
+    @DeleteMapping("/answers/{answerId}/{memberId}")
+    public ApiResponse<String> deleteAnswer(
+        @PathVariable Long answerId,
+        @PathVariable Long memberId
+    ) {
+        answerService.deleteAnswer(answerId, memberId);
+        return ApiResponse.onSuccess("답변이 성공적으로 삭제되었습니다.");
     }
 }
