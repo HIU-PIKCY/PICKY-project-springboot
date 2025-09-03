@@ -41,4 +41,12 @@ public interface QuestionService {
      * @return 질문 목록 응답 DTO
      */
     QuestionListResponseDTO getQuestionList(Long bookId);
+
+    /**
+     * 질문을 삭제합니다.
+     *
+     * @param questionId 삭제할 질문 ID
+     * @param memberId   요청하는 회원 ID (작성자 확인용)
+     */
+    void deleteQuestion(Long questionId, Long memberId);
 }

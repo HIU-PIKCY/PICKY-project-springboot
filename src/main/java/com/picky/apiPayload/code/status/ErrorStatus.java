@@ -31,6 +31,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 질문
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_404", "해당 질문을 찾을 수 없습니다."),
+    NOT_QUESTION_AUTHOR(HttpStatus.FORBIDDEN, "QUESTION_403", "질문 작성자만 삭제할 수 있습니다."),
 
     // 질문 좋아요
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "QUESTION_LIKE_401", "이미 좋아요를 눌렀습니다."),
