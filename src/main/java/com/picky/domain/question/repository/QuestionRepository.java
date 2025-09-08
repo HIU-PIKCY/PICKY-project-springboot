@@ -19,8 +19,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
     Optional<Question> findByIdWithBookAndMember(@Param("questionId") Long questionId);
 
     // getQuestionList를 위한 쿼리
-    @Query("SELECT q FROM Question q JOIN FETCH q.book b WHERE q.book.id = :bookId")
-    List<Question> findByBookIdWithBook(@Param("bookId") Long bookId);
+    @Query("SELECT q FROM Question q JOIN FETCH q.member m WHERE q.book.id = :bookId")
+    List<Question> findByBookIdWithMember(@Param("bookId") Long bookId);
 
     /**
      * 특정 사용자가 작성한 질문 목록을 조회합니다. (기본 질문 정보와 책 정보만 조회)

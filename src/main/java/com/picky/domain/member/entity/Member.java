@@ -59,4 +59,6 @@ public class Member extends BaseEntity {
   @OneToMany(mappedBy = "member")
   @Builder.Default
   private List<QuestionLike> questionLikes = new ArrayList<>();
+
+  private String profileImg;
 }

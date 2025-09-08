@@ -150,6 +150,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         return QuestionDetailResponseDTO.builder()
                 .id(question.getId())
+                .profileImg(question.getMember().getProfileImg())
                 .title(question.getTitle())
                 .content(question.getContent())
                 .author(question.getMember().getNickname())
@@ -174,11 +175,14 @@ public class QuestionServiceImpl implements QuestionService {
         bookRepository.findById(bookId)
             .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND));
 
-        List<Question> questions = questionRepository.findByBookIdWithBook(bookId);
+        // 멤버까지 한 번에 가져오자
+        List<Question> questions = questionRepository.findByBookIdWithMember(bookId);
 
         List<QuestionInfoResponseDTO> questionInfoResponseDTOs = questions.stream()
                 .map(q -> QuestionResponseDTO.QuestionInfoResponseDTO.builder()
                     .id(q.getId())
+                    .nickname(q.getMember().getNickname())
+                    .profileImg(q.getMember().getProfileImg())
                     .title(q.getTitle())
                     .content(q.getContent())
                     .views(q.getViews())
