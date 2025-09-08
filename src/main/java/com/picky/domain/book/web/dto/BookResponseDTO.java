@@ -94,4 +94,25 @@ public class BookResponseDTO{
                     .build();
         }
     }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "책 ID 조회 응답 DTO")
+    public static class BookIdResponseDTO {
+
+        @Schema(description = "책 ID", example = "1")
+        private Long id;
+
+        @Schema(description = "ISBN", example = "9788936434120")
+        private String isbn;
+
+        @Schema(description = "책 제목", example = "소년이 온다")
+        private String title;
+
+        @Schema(description = "저자", example = "한강")
+        private String author;
+    }
 }
