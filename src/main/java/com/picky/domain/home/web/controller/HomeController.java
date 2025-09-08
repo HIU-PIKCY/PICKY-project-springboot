@@ -4,10 +4,9 @@ import com.picky.apiPayload.ApiResponse;
 import com.picky.domain.ai.scheduler.AiSummaryScheduler;
 import com.picky.domain.home.service.HomeService;
 import com.picky.domain.home.web.dto.HomeResponseDTO.HotTopicResponseDTO;
-import com.picky.domain.home.web.dto.HomeResponseDTO.MostQuestionedBookResponseDTO;
+import com.picky.domain.home.web.dto.HomeResponseDTO.MostQuestionedBooksResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +39,7 @@ public class HomeController {
 
     @Operation(summary = "가장 많이 질문된 책 목록 조회 API", description = "이번 주에 가장 많이 질문된 책 7권을 조회합니다.")
     @GetMapping("/most-questioned-books")
-    public ApiResponse<List<MostQuestionedBookResponseDTO>>  getMostQuestionedBooks() {
+    public ApiResponse<MostQuestionedBooksResponseDTO>  getMostQuestionedBooks() {
         return ApiResponse.onSuccess(homeService.getMostQuestionedBooks());
     }
 }

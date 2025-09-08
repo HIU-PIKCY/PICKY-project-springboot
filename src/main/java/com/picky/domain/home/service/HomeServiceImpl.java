@@ -5,14 +5,15 @@ import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.home.web.dto.HomeResponseDTO.HotTopicResponseDTO;
 import com.picky.domain.home.web.dto.HomeResponseDTO.MostQuestionedBookResponseDTO;
+import com.picky.domain.home.web.dto.HomeResponseDTO.MostQuestionedBooksResponseDTO;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.WeekFields;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class HomeServiceImpl implements HomeService {
     public HotTopicResponseDTO getHotTopic() {
 
         DateRange lastWeek = getLastWeekRange();
+        String weekInfo = getWeekInfoString(lastWeek.start()); // 주차 정보 생성
 
         Question question = questionRepository
             .findTopQuestionBetween(lastWeek.start(), lastWeek.end(), PageRequest.of(0, 1))
@@ -48,6 +50,7 @@ public class HomeServiceImpl implements HomeService {
                                   .questionTitle(question.getTitle())
                                   .aiSummary(question.getAiSummary())
                                   .hashtags(hashtagList)
+                                  .weekInfo(weekInfo)
                                   .likes(question.getQuestionLikes().size())
                                   .comments(question.getAnswers().size())
                                   .views(question.getViews())
@@ -55,23 +58,29 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public List<MostQuestionedBookResponseDTO> getMostQuestionedBooks() {
+    public MostQuestionedBooksResponseDTO getMostQuestionedBooks() {
 
         DateRange lastWeek = getLastWeekRange();
+        String weekInfo = getWeekInfoString(lastWeek.start()); // 주차 정보 생성
 
         // 상위 7권 조회
         List<Book> books = questionRepository.findTopBooksByQuestionBetween(
             lastWeek.start(), lastWeek.end(), PageRequest.of(0, 7)
         );
 
-        return books.stream()
-                    .map(book -> MostQuestionedBookResponseDTO.builder()
-                                                              .bookId(book.getId())
-                                                              .bookTitle(book.getTitle())
-                                                              .bookAuthor(book.getAuthor())
-                                                              .bookCover(book.getCoverImage())
-                                                              .build())
-                    .collect(Collectors.toList());
+        List<MostQuestionedBookResponseDTO> response = books.stream()
+            .map(book -> MostQuestionedBookResponseDTO.builder()
+                                                      .bookId(book.getId())
+                                                      .bookTitle(book.getTitle())
+                                                      .bookAuthor(book.getAuthor())
+                                                      .bookCover(book.getCoverImage())
+                                                      .build())
+            .toList();
+
+        return MostQuestionedBooksResponseDTO.builder()
+            .weekInfo(weekInfo)
+            .books(response)
+            .build();
     }
 
     private DateRange getLastWeekRange() {
@@ -86,4 +95,11 @@ public class HomeServiceImpl implements HomeService {
     }
 
     private record DateRange(LocalDateTime start, LocalDateTime end) {}
+
+    private String getWeekInfoString(LocalDateTime date) {
+        WeekFields weekFields = WeekFields.of(DayOfWeek.MONDAY, 1);
+        int month = date.getMonthValue();
+        int weekOfMonth = date.get(weekFields.weekOfMonth());
+        return String.format("%d월 %d주차", month, weekOfMonth);
+    }
 }

@@ -23,9 +23,20 @@ public class HomeResponseDTO {
         private String aiSummary;
         private List<String> hashtags;
 
+        private String weekInfo; // "9월 1주차" 같은 정보
+
         private int likes;
         private int comments;
         private int views;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MostQuestionedBooksResponseDTO { // 질문이 가장 많은 책 응답
+        private List<MostQuestionedBookResponseDTO> books;
+        private String weekInfo;
     }
 
     @Getter
