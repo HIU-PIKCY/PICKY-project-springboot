@@ -20,6 +20,10 @@ spring:
 aladin:
   api:
     key: ${ALADIN_API_KEY}
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+
 #naver:
 #  client:
 #    id: "네이버ClientId"

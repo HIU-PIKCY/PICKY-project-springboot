@@ -1,8 +1,11 @@
 package com.picky.domain.question.repository;
 
+import com.picky.domain.book.entity.Book;
 import com.picky.domain.question.entity.Question;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +55,14 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
     @Modifying(clearAutomatically = true)
     @Query("update Question q set q.views = q.views + 1 where q.id = :id")
     int increaseViews(@Param("id") Long id);
+
+    @Query("SELECT q FROM Question q WHERE q.createdAt >= :startDate AND q.createdAt < :endDate ORDER BY SIZE(q.answers) DESC, q.views DESC")
+    List<Question> findTopQuestionBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    @Query("SELECT q.book FROM Question q WHERE q.createdAt >= :startDate AND q.createdAt < :endDate GROUP BY q.book ORDER BY COUNT(q) DESC")
+    List<Book> findTopBooksByQuestionBetween(
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate,
+        Pageable pageable
+    );
 }
