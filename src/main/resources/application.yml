@@ -15,6 +15,8 @@ spring:
 aladin:
   api:
     key: ${ALADIN_API_KEY}
+openai:
+  api-key: ${OPENAI_API_KEY}
 cloud:
   aws:
     s3:
