@@ -1,5 +1,6 @@
 package com.picky.domain.question.repository;
 
+import com.picky.domain.book.entity.Book;
 import com.picky.domain.question.entity.Question;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -58,4 +59,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long>,
     @Query("SELECT q FROM Question q WHERE q.createdAt >= :startDate AND q.createdAt < :endDate ORDER BY SIZE(q.answers) DESC, q.views DESC")
     List<Question> findTopQuestionBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
 
+    @Query("SELECT q.book FROM Question q WHERE q.createdAt >= :startDate AND q.createdAt < :endDate GROUP BY q.book ORDER BY COUNT(q) DESC")
+    List<Book> findTopBooksByQuestionBetween(
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate,
+        Pageable pageable
+    );
 }

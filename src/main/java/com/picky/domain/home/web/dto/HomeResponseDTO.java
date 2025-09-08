@@ -27,4 +27,15 @@ public class HomeResponseDTO {
         private int comments;
         private int views;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MostQuestionedBookResponseDTO { // 질문이 가장 많은 책 응답
+        private Long bookId;
+        private String bookTitle;
+        private String bookAuthor;
+        private String bookCover;
+    }
 }
