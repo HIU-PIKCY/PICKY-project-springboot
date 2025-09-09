@@ -3,11 +3,6 @@ spring:
     active: dev # 배포용은 prod, 로컬용은 dev 로 바꿔 사용
   application:
     name: backend
-  datasource:
-    url: ${DEV_DB_URL}
-    username: ${DEV_DB_USERNAME}
-    password: ${DEV_DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
@@ -20,9 +15,20 @@ spring:
 aladin:
   api:
     key: ${ALADIN_API_KEY}
-
 openai:
   api-key: ${OPENAI_API_KEY}
+cloud:
+  aws:
+    s3:
+      bucket: picky-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+
 
 #naver:
 #  client:

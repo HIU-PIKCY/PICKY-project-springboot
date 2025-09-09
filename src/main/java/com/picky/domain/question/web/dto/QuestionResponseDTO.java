@@ -28,6 +28,7 @@ public class QuestionResponseDTO {
     @Builder
     public static class QuestionDetailResponseDTO { // 질문 상세 응답 DTO
         private Long id;
+        private String profileImg; // 작성자 프로필 이미지
         private String title;
         private String content;
         private String author; // 멤버 (질문 작성자)
@@ -65,6 +66,8 @@ public class QuestionResponseDTO {
     @Builder
     public static class QuestionInfoResponseDTO {
         private Long id;
+        private String nickname; // 작성자 닉네임
+        private String profileImg; // 작성자 프로필 이미지
         private String title;
         private String content;
         private int views;
