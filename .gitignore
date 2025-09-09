@@ -43,3 +43,6 @@ out/
 .DS_Store
 .gradle/
 .env
+
+# Firebase service account key
+firebase-adminsdk.json
