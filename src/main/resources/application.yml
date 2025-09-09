@@ -4,10 +4,36 @@ spring:
   application:
     name: backend
   jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        default_batch_fetch_size: 1000
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+        hbm2ddl:
+          auto: update
+aladin:
+  api:
+    key: ${ALADIN_API_KEY}
+openai:
+  api-key: ${OPENAI_API_KEY}
+cloud:
+  aws:
+    s3:
+      bucket: picky-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+
+
+#naver:
+#  client:
+#    id: "네이버ClientId"
+#    secret: "네이버ClientSecret"
 
 jwt:
   secret: ${JWT_SECRET}

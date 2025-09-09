@@ -1,13 +1,14 @@
-//package com.picky.domain.member.service;
-//
-//import com.picky.domain.member.web.dto.MemberSignUpRequestDTO;
-//
-//public interface MemberService {
-//
-//    /**
-//     * 회원가입을 처리합니다.
-//     * @param memberSignUpRequestDto 회원가입 요청 정보 DTO
-//     */
-//    void signUp(MemberSignUpRequestDTO memberSignUpRequestDto);
-//
-//}
+package com.picky.domain.member.service;
+
+import com.picky.domain.member.entity.Member;
+
+public interface MemberService {
+
+    /**
+     * member entity를 찾습니다.
+     *
+     * @param id 찾을 member의 id
+     * @return Member entity
+     */
+    Member findById(Long id);
+}

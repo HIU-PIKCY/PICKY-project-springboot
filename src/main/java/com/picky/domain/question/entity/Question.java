@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 @Getter
 @Entity
@@ -45,10 +46,15 @@ public class Question extends BaseEntity {
   @Column(nullable = false, length = 512)
   private String content;
 
-  private Integer pageNum;
+  private int pageNum;
+
+  private int views;
 
   @Builder.Default
   private Boolean isAiGenerated = false;
+
+  private String aiSummary;
+  private String aiHashtags; // 해시태그는 ,로 구분된 문자열로 저장
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -57,9 +63,16 @@ public class Question extends BaseEntity {
 
   @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
   @Builder.Default
+  @BatchSize(size = 100)
   private List<Answer> answers = new ArrayList<>();
 
   @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
   @Builder.Default
+  @BatchSize(size = 100)
   private List<QuestionLike> questionLikes = new ArrayList<>();
+
+  public void updateAIAnalysis(String summary, String hashtags) {
+    this.aiSummary = summary;
+    this.aiHashtags = hashtags;
+  }
 }
