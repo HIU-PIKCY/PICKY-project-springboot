@@ -34,3 +34,10 @@ cloud:
 #  client:
 #    id: "네이버ClientId"
 #    secret: "네이버ClientSecret"
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expire-time: 1800000
+  refresh-token-expire-time: 604800000
+firebase:
+  service-account-key-path: firebase-adminsdk.json
