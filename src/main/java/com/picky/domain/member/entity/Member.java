@@ -24,14 +24,14 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Member extends BaseEntity {
 
-  @Column(nullable = false, length = 50, unique = true)
-  private String memberId;
+//  @Column(nullable = false, length = 50, unique = true)
+//  private String memberId;
 
   @Column(nullable = false, length = 256)
   private String name;
 
-  @Column(nullable = false, length = 256)
-  private String password;
+//  @Column(nullable = false, length = 256)
+//  private String password;
 
   @Column(nullable = false, length = 256, unique = true)
   private String email;
@@ -41,7 +41,7 @@ public class Member extends BaseEntity {
   @Builder.Default
   private LoginType type = LoginType.GENERAL;
 
-  @Column(length = 10)
+  @Column(length = 50)
   private String nickname;
 
   @ElementCollection(fetch = FetchType.EAGER)
