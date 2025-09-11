@@ -3,6 +3,7 @@ package com.picky.domain.auth.service;
 import java.util.Collections;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final MemberRepository memberRepository;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String email = decodedToken.getEmail();
+
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         boolean isNewUser = optionalMember.isEmpty();
 
