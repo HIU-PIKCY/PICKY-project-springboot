@@ -3,6 +3,7 @@ package com.picky.domain.auth.service;
 import java.util.Collections;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
 
         String email = decodedToken.getEmail();
         log.info("decoded firebase email: {}", email);
+
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         boolean isNewUser = optionalMember.isEmpty();
         log.info(email);
