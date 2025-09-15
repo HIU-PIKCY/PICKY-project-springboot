@@ -64,6 +64,12 @@ public class BookResponseDTO{
         private String cover;
         private String isbn13;
         private String pubDate;
+        private SubInfo subInfo;
+    }
+
+    @Data
+    public static class SubInfo {
+        private Integer itemPage;
     }
 
     @Getter

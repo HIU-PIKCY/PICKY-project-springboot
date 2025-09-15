@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +39,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class BookServiceImpl implements BookService {
   private final WebClient webClient;
   private final JPAQueryFactory queryFactory;
-  private final GoogleBooksClient googleBooksClient;
   private final BookRepository bookRepository;
     private final BookShelfServiceImpl bookShelfService;
 
@@ -59,21 +59,21 @@ public class BookServiceImpl implements BookService {
   private String aladinApiKey;
 
     @Override
-    public Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable) {
+    public Page<BookDTO> searchBooks(BookRequestDTO request) {
         String queryType = switch (request.getType().toLowerCase()) {
             case "title" -> "Title";
             case "author" -> "Author";
             default -> "Keyword";
         };
 
-      int startIndex = pageable.getPageNumber() * pageable.getPageSize() + 1;
-      int maxResults = pageable.getPageSize();
+        int start = request.getPage() * request.getSize() + 1; // Aladin API는 1부터 시작
+        int maxResults = request.getSize();
 
         String uri = "https://www.aladin.co.kr/ttb/api/ItemSearch.aspx"
                 + "?ttbkey={apiKey}&Query={query}&QueryType={type}&MaxResults={maxResults}&start={start}&SearchTarget=Book&output=js"+"&Version=20131101"+ "&Sort=SalesPoint";
 
         BookResponseDTO response = webClient.get()
-                .uri(uri, aladinApiKey, request.getKeyword(), queryType, maxResults, startIndex)
+                .uri(uri, aladinApiKey, request.getKeyword(), queryType, maxResults, start)
                 .retrieve()
                 .bodyToMono(BookResponseDTO.class)
                 .block();
@@ -83,31 +83,74 @@ public class BookServiceImpl implements BookService {
               .orElse(Collections.emptyList())
               .stream()
               .filter(Objects::nonNull)
-              .map(item -> BookDTO.builder()
+              .map(item -> {
+                  // authors 필드에서 괄호 안 내용 제거하고 trim
+                  List<String> authors = Optional.ofNullable(item.getAuthor())
+                          .map(s -> Arrays.stream(s.split(","))
+                                  .map(String::trim)
+                                  .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 등 제거
+                                  .toList()
+                          ).orElse(Collections.emptyList());
+
+                  return BookDTO.builder()
                           .title(item.getTitle())
-                      .authors(item.getAuthor() != null ? List.of(item.getAuthor().split(",")) : Collections.emptyList())
+                          .authors(authors)
                           .publisher(item.getPublisher())
                           .coverImage(item.getCover())
                           .isbn(item.getIsbn13())
                           .publishedAt(item.getPubDate())
-                          .build())
+                          .build();
+              })
               .collect(Collectors.toList());
 
-      long total = (response != null && response.getTotalResults() != null)
-              ? response.getTotalResults()
-              : dtos.size();
+        int totalCount = Optional.ofNullable(response)
+                .map(BookResponseDTO::getTotalResults)
+                .orElse(dtos.size());
 
-    return new PageImpl<>(dtos, pageable, total);
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+
+        return new PageImpl<>(dtos, pageable, totalCount);
   }
 
     @Override
     public BookDetailDTO getBookDetailByIsbn(String isbn, Long memberId) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
 
-            BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(isbn);
-            if (bookDTO == null) {
-                throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
-            }
+        // 알라딘 상세조회 API 호출
+        String uri = "https://www.aladin.co.kr/ttb/api/ItemLookUp.aspx"
+                + "?ttbkey={apiKey}&itemIdType=ISBN&ItemId={isbn}&output=js&Version=20131101";
+
+        BookResponseDTO response = webClient.get()
+                .uri(uri, aladinApiKey, isbn)
+                .retrieve()
+                .bodyToMono(BookResponseDTO.class)
+                .block();
+
+        if (response == null || response.getItem() == null || response.getItem().isEmpty()) {
+            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
+        }
+
+        // 첫 번째 결과만 사용
+        BookResponseDTO.Item item = response.getItem().get(0);
+
+        // authors 가공 (검색 API에서 했던 것과 동일하게)
+        List<String> authors = Optional.ofNullable(item.getAuthor())
+                .map(s -> Arrays.stream(s.split(","))
+                        .map(String::trim)
+                        .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 제거
+                        .toList()
+                ).orElse(Collections.emptyList());
+
+        // DTO 변환
+        BookDetailDTO bookDTO = BookDetailDTO.builder()
+                .title(item.getTitle())
+                .authors(authors)
+                .publisher(item.getPublisher())
+                .coverImage(item.getCover())
+                .isbn(item.getIsbn13())
+                .publishedAt(item.getPubDate())
+                .pageCount(item.getSubInfo() != null ? item.getSubInfo().getItemPage() : null) // 알라딘 응답에 있으면
+                .build();
 
         BooleanExpression inLibrary = bookShelf.book.isbn.eq(isbn)
                 .and(bookShelf.member.id.eq(memberId))
@@ -130,7 +173,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = false)
     @Override
     public BookDetailDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId) {
-        BookDetailDTO bookDTO = googleBooksClient.getBookDetailByIsbn(request.isbn);
+        BookDetailDTO bookDTO = getBookDetailByIsbn(request.isbn, memberId);
 
         Book book = findByIsbn(request.getIsbn());
         if (book == null) {

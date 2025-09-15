@@ -1,5 +1,6 @@
 package com.picky.domain.auth.web.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,7 +21,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponseDTO> loginOrSignUp(@RequestHeader("Authorization") String authorizationHeader) {
+    public ApiResponse<AuthResponseDTO> loginOrSignUp(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader) {
         String firebaseToken = extractToken(authorizationHeader);
         return ApiResponse.onSuccess(authService.loginOrSignUp(firebaseToken));
     }

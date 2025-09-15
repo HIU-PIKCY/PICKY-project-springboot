@@ -31,10 +31,9 @@ public interface BookService {
      * google api를 이용하여 책을 검색합니다.
      *
      * @param request 검색을 위한 요청 객체
-     * @param pageable 페이징을 위한 객체
      * @return Page<BookDTO> 페이징 처리된 BookDTO 리스트
      */
-    Page<BookDTO> searchBooks(BookRequestDTO request, Pageable pageable);
+    Page<BookDTO> searchBooks(BookRequestDTO request);
 
     /**
      * 책을 저장하고, 내 서재에 추가합니다.
