@@ -10,6 +10,7 @@ import com.picky.apiPayload.ApiResponse;
 import com.picky.domain.auth.service.AuthService;
 import com.picky.domain.auth.web.dto.AuthResponseDTO;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,7 +21,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponseDTO> loginOrSignUp(@RequestHeader("Authorization") String authorizationHeader) {
+    public ApiResponse<AuthResponseDTO> loginOrSignUp(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader) {
         String firebaseToken = extractToken(authorizationHeader);
         return ApiResponse.onSuccess(authService.loginOrSignUp(firebaseToken));
     }

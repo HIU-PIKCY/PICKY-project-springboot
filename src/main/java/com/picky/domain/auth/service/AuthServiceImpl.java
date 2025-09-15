@@ -21,6 +21,7 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -42,9 +43,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String email = decodedToken.getEmail();
+        log.info("decoded firebase email: {}", email);
 
         Optional<Member> optionalMember = memberRepository.findByEmail(email);
         boolean isNewUser = optionalMember.isEmpty();
+        log.info(email);
 
         Member member = optionalMember.orElseGet(() -> {
 
