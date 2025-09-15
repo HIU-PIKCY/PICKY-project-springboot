@@ -1,5 +1,6 @@
 package com.picky.domain.auth.web.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;

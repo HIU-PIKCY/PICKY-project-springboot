@@ -36,16 +36,9 @@ public class BookController {
     @GetMapping("/search")
     public ApiResponse<List<BookDTO>> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
     {
-        Pageable pageable = request.toPageable();
-        Page<BookDTO> searchBooksPage = bookService.searchBooks(request, pageable);
+        Page<BookDTO> searchBooksPage = bookService.searchBooks(request);
 
-        return ApiResponse.onSuccess(
-                searchBooksPage.getContent(),
-                new PagedMetaDTO(
-                        searchBooksPage.getNumber() + 1,
-                        searchBooksPage.getSize(),
-                        searchBooksPage.getTotalElements())
-        );
+        return ApiResponse.onSuccess(searchBooksPage.getContent());
     }
 
     @Operation(summary = "책 상세 조회 API", description = "isbn으로 책을 상세 조회합니다.")
