@@ -5,7 +5,6 @@ import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.GetBookShelfReques
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO.GetBookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.PatchBookShelfRequestDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BookShelfService {
