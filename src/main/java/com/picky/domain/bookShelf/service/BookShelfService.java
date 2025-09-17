@@ -3,6 +3,7 @@ package com.picky.domain.bookShelf.service;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.GetBookShelfRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO.GetBookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.PatchBookShelfRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,7 @@ public interface BookShelfService {
      * @param pageable 페이징을 위한 객체
      * @return Page<BookShelfResponseDTO> 페이징 처리된 BookShelfResponseDTO 리스트
      */
-    Page<BookShelfResponseDTO> getBookShelf(GetBookShelfRequestDTO request, Long memberId, Pageable pageable);
+    GetBookShelfResponseDTO getBookShelf(GetBookShelfRequestDTO request, Long memberId, Pageable pageable);
 
     /**
      * 내 서재에서 책을 삭제합니다.

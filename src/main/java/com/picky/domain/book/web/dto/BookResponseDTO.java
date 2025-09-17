@@ -56,6 +56,15 @@ public class BookResponseDTO{
         }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @Schema(description = "책 검색 응답 DTO")
+    public static class BookSearchResponseDTO {
+        private List<BookResponseDTO.BookDTO> items;
+        private boolean hasNext;
+    }
+
     @Data
     public static class Item {
         private String title;
@@ -121,4 +130,6 @@ public class BookResponseDTO{
         @Schema(description = "저자", example = "한강")
         private String author;
     }
+
+
 }

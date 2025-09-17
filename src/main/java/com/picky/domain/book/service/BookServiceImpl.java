@@ -9,6 +9,7 @@ import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookSearchResponseDTO;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -25,10 +26,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -59,7 +56,7 @@ public class BookServiceImpl implements BookService {
   private String aladinApiKey;
 
     @Override
-    public Page<BookDTO> searchBooks(BookRequestDTO request) {
+    public BookSearchResponseDTO searchBooks(BookRequestDTO request) {
         String queryType = switch (request.getType().toLowerCase()) {
             case "title" -> "Title";
             case "author" -> "Author";
@@ -107,9 +104,13 @@ public class BookServiceImpl implements BookService {
                 .map(BookResponseDTO::getTotalResults)
                 .orElse(dtos.size());
 
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        boolean hasNext = totalCount > request.getPage() * request.getSize();
 
-        return new PageImpl<>(dtos, pageable, totalCount);
+        BookSearchResponseDTO result = new BookSearchResponseDTO();
+        result.setItems(dtos);
+        result.setHasNext(hasNext);
+
+        return result;
   }
 
     @Override
