@@ -4,9 +4,11 @@ import com.picky.apiPayload.ApiResponse;
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.code.status.SuccessStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.auth.web.CurrentUser;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.service.BookShelfService;
 import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO;
+import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO.GetBookShelfResponseDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.GetBookShelfRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.PatchBookShelfRequestDTO;
 import com.picky.domain.member.entity.Member;
@@ -29,24 +31,17 @@ import java.util.List;
 public class BookShelfController {
 
     private final BookShelfService bookShelfService;
-    private final MemberService memberService;
 
     @Operation(summary = "내 서재 목록 조회 API", description = "내 서재 목록을 조회합니다.")
     @GetMapping()
-    public ApiResponse<List<BookShelfResponseDTO>> getBookShelf(@Valid @ModelAttribute GetBookShelfRequestDTO request)
+    public ApiResponse<GetBookShelfResponseDTO> getBookShelf(@Valid @ModelAttribute GetBookShelfRequestDTO request)
     {
         Pageable pageable = request.toPageable();
-        Member member = memberService.findById(1L);
-        //todo : 토큰으로부터 member 불러오기, 권한 확인
-        Page<BookShelfResponseDTO> bookShelfPage = bookShelfService.getBookShelf(request, member.getId(), pageable);
+        Member member = CurrentUser.get();
 
-        return ApiResponse.onSuccess(
-                        bookShelfPage.getContent(),
-                        new PagedMetaDTO(
-                                bookShelfPage.getNumber() + 1,
-                                bookShelfPage.getSize(),
-                                bookShelfPage.getTotalElements())
-                );
+        GetBookShelfResponseDTO bookShelf = bookShelfService.getBookShelf(request, member.getId(), pageable);
+
+        return ApiResponse.onSuccess(bookShelf);
     }
 
     @Operation(summary = "내 서재 책 삭제 API", description = "내 서재에서 책을 삭제합니다.")
@@ -54,8 +49,8 @@ public class BookShelfController {
     public ApiResponse<SuccessStatus> deleteBookShelf(@PathVariable Long id) {
         BookShelf bookShelf = bookShelfService.findById(id);
         if(bookShelf==null) throw new GeneralException(ErrorStatus.BOOKSHELF_NOT_FOUND);
-        Member member = memberService.findById(1L);
-        //todo : 토큰으로부터 member 불러오기, 권한 확인
+        Member member = CurrentUser.get();
+
         if (!bookShelf.getMember().getId().equals(member.getId())) {
             throw new GeneralException(ErrorStatus._FORBIDDEN);
         }
@@ -68,8 +63,8 @@ public class BookShelfController {
     public ApiResponse<BookShelfResponseDTO> patchBookStatus(@PathVariable Long id, @Valid @RequestBody PatchBookShelfRequestDTO request) {
         BookShelf bookShelf = bookShelfService.findById(id);
         if(bookShelf==null) throw new GeneralException(ErrorStatus.BOOKSHELF_NOT_FOUND);
-        Member member = memberService.findById(1L);
-        //todo : 토큰으로부터 member 불러오기, 권한 확인
+        Member member = CurrentUser.get();
+
         if (!bookShelf.getMember().getId().equals(member.getId())) {
             throw new GeneralException(ErrorStatus._FORBIDDEN);
         }

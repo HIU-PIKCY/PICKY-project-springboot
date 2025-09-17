@@ -4,12 +4,11 @@ import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
 import com.picky.domain.bookShelf.entity.enums.ReadingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,4 +37,18 @@ public class BookShelfResponseDTO {
                 .createdAt(bookShelf.getCreatedAt())
                 .build();
     }
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Schema(description = "서재 검색 응답 DTO (무한 스크롤용)")
+    public class GetBookShelfResponseDTO {
+        private List<BookShelfResponseDTO> items;
+        private boolean hasNext;
+    }
 }
+
+

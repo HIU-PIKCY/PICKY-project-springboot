@@ -3,8 +3,10 @@ package com.picky.domain.book.web.controller;
 import com.picky.apiPayload.ApiResponse;
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.auth.web.CurrentUser;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.service.BookService;
+import com.picky.domain.book.web.dto.BookResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookIdResponseDTO;
@@ -12,7 +14,6 @@ import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.AddBookRequestDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.service.MemberService;
-import com.picky.global.common.PagedMetaDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,6 @@ import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,23 +30,20 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "책")
 public class BookController {
     private final BookService bookService;
-    private final MemberService memberService;
 
     @Operation(summary = "키워드로 책 검색 API", description = "키워드와 타입에 따른 검색 결과 목록을 조회합니다.")
     @GetMapping("/search")
-    public ApiResponse<List<BookDTO>> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
+    public ApiResponse<BookResponseDTO.BookSearchResponseDTO> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
     {
-        Page<BookDTO> searchBooksPage = bookService.searchBooks(request);
-
-        return ApiResponse.onSuccess(searchBooksPage.getContent());
+        BookResponseDTO.BookSearchResponseDTO searchBooks = bookService.searchBooks(request);
+        return ApiResponse.onSuccess(searchBooks);
     }
 
     @Operation(summary = "책 상세 조회 API", description = "isbn으로 책을 상세 조회합니다.")
     @GetMapping("/{isbn}")
     public ApiResponse<BookDetailDTO> getBookDetail(@PathVariable String isbn)
     {
-        Member member = memberService.findById(1L);
-        //todo : 토큰으로부터 member 불러오기
+        Member member = CurrentUser.get();
         BookDetailDTO bookdto = bookService.getBookDetailByIsbn(isbn, member.getId());
         if(bookdto==null) throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
 
@@ -56,8 +53,8 @@ public class BookController {
     @Operation(summary = "서재에 책 추가 API", description = "책을 내 서재에 추가합니다.")
     @PostMapping()
     public ApiResponse<BookDetailDTO> saveBookByIsbn(@Valid @RequestBody AddBookRequestDTO request){
-        Member member = memberService.findById(1L);
-        //todo : 토큰으로부터 member 불러오기
+
+        Member member = CurrentUser.get();
         BookDetailDTO bookDetailDTO = bookService.saveBookByIsbn(request, member.getId());
 
         return ApiResponse.onSuccess(bookDetailDTO);
