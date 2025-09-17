@@ -1,12 +1,10 @@
 package com.picky.domain.book.service;
 
 import com.picky.domain.book.entity.Book;
-import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookSearchResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.bookShelf.web.dto.BookShelfRequestDTO.AddBookRequestDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface BookService {
 
@@ -33,7 +31,7 @@ public interface BookService {
      * @param request 검색을 위한 요청 객체
      * @return Page<BookDTO> 페이징 처리된 BookDTO 리스트
      */
-    Page<BookDTO> searchBooks(BookRequestDTO request);
+    BookSearchResponseDTO searchBooks(BookRequestDTO request);
 
     /**
      * 책을 저장하고, 내 서재에 추가합니다.

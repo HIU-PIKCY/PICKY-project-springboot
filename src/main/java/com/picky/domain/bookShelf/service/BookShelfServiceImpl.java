@@ -18,11 +18,10 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.picky.domain.bookShelf.web.dto.BookShelfResponseDTO.GetBookShelfResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +54,7 @@ public class BookShelfServiceImpl implements BookShelfService{
     }
 
     @Override
-    public Page<BookShelfResponseDTO> getBookShelf(GetBookShelfRequestDTO request, Long memberId, Pageable pageable) {
+    public GetBookShelfResponseDTO getBookShelf(GetBookShelfRequestDTO request, Long memberId, Pageable pageable) {
         QBookShelf bookShelf = QBookShelf.bookShelf;
         QMember member = QMember.member;
         QBook book = QBook.book;
@@ -101,7 +100,13 @@ public class BookShelfServiceImpl implements BookShelfService{
                         .fetchOne()
         ).orElse(0L);
 
-        return new PageImpl<>(dtos, pageable, total);
+        boolean hasNext = total > pageable.getOffset() + pageable.getPageSize();
+        GetBookShelfResponseDTO result =  GetBookShelfResponseDTO.builder()
+                .items(dtos)
+                .hasNext(hasNext)
+                .build();
+
+        return result;
     }
 
     @Override
