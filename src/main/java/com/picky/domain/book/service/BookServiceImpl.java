@@ -86,7 +86,9 @@ public class BookServiceImpl implements BookService {
                           .map(s -> Arrays.stream(s.split(","))
                                   .map(String::trim)
                                   .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 등 제거
-                                  .toList()
+                                  .findFirst()
+                                  .map(List::of)
+                                  .orElse(Collections.emptyList())
                           ).orElse(Collections.emptyList());
 
                   return BookDTO.builder()
@@ -134,12 +136,14 @@ public class BookServiceImpl implements BookService {
         // 첫 번째 결과만 사용
         BookResponseDTO.Item item = response.getItem().get(0);
 
-        // authors 가공 (검색 API에서 했던 것과 동일하게)
+        // authors 가공
         List<String> authors = Optional.ofNullable(item.getAuthor())
                 .map(s -> Arrays.stream(s.split(","))
                         .map(String::trim)
                         .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 제거
-                        .toList()
+                        .findFirst()
+                        .map(List::of)
+                        .orElse(Collections.emptyList())
                 ).orElse(Collections.emptyList());
 
         // DTO 변환
