@@ -45,7 +45,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     @Schema(description = "서재 검색 응답 DTO (무한 스크롤용)")
-    public class GetBookShelfResponseDTO {
+    public static class GetBookShelfResponseDTO {
         private List<BookShelfResponseDTO> items;
         private boolean hasNext;
     }
