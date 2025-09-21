@@ -7,8 +7,11 @@ import com.picky.domain.member.service.MemberService;
 import com.picky.domain.member.web.dto.MemberResponseDTO;
 import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/members")
 @Tag(name = "사용자")
 public class MemberController {
@@ -35,9 +39,13 @@ public class MemberController {
     @Operation(summary = "내 정보 수정 API", description = "현재 로그인한 사용자의 정보를 수정합니다.")
     @PatchMapping("/profile")
     public ApiResponse<MemberResponseDTO> patchMember(
-            @AuthenticationPrincipal CustomerUserDetails customerUserDetails, PatchMemberRequestDTO request
+            @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
+            @Valid @RequestBody PatchMemberRequestDTO request
     ) {
         Member currentMember = customerUserDetails.getMember();
+        log.info("Request object: {}", request);
+        log.info("Request class: {}", request.getClass().getName());
+        log.info("Nickname: {}, ProfileImg: {}", request.getNickname(), request.getProfileImg());
         MemberResponseDTO memberResponseDTO = memberService.patchMember(currentMember, request);
         return ApiResponse.onSuccess(memberResponseDTO);
     }

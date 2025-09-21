@@ -1,13 +1,9 @@
 package com.picky.domain.member.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Getter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "내 프로필 수정 요청 DTO")

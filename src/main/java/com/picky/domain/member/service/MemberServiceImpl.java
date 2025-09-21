@@ -10,6 +10,7 @@ import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +18,8 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Slf4j
+@Transactional
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -36,24 +38,30 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Transactional
     @Override
     public MemberResponseDTO patchMember(Member member, PatchMemberRequestDTO request) {
+        try {
+            if (request.getNickname() != null) {
+                validateNickname(request.getNickname()); // 중복이면 예외 발생
+                member.setNickname(request.getNickname());
+            }
+            if (request.getProfileImg() != null) {
+                member.setProfileImg(request.getProfileImg());
+            }
 
-        if (request.getNickname() != null) {
-            validateNickname(request.getNickname()); // 중복이면 예외 발생
-            member.setNickname(request.getNickname());
+            //Member savedMember = memberRepository.save(member);
+
+            return MemberResponseDTO.builder()
+                    .id(member.getId())
+                    .email(member.getEmail())
+                    .name(member.getName())
+                    .nickname(member.getNickname())
+                    .profileImg(member.getProfileImg())
+                    .build();
+        } catch(Exception e) {
+            log.error("프로필 수정 실패", e);
+            throw new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
-        if (request.getProfileImg() != null) {
-            member.setProfileImg(request.getProfileImg());
-        }
-
-        Member savedMember = memberRepository.save(member);
-
-        return MemberResponseDTO.builder()
-                .id(savedMember.getId())
-                .email(savedMember.getEmail())
-                .nickname(savedMember.getNickname())
-                .profileImg(savedMember.getProfileImg())
-                .build();
     }
 }
