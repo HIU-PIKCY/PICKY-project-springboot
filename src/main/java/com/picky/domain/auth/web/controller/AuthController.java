@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ApiResponse<AuthResponseDTO> signUp(@RequestHeader("Authorization") String authorizationHeader, @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
+    public ApiResponse<AuthResponseDTO> signUp(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader, @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
         String firebaseToken = extractToken(authorizationHeader);
         return ApiResponse.onSuccess(authService.signUp(firebaseToken, memberSignUpRequestDTO));
     }

@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
                 member.setProfileImg(request.getProfileImg());
             }
 
-            //Member savedMember = memberRepository.save(member);
+            memberRepository.save(member);
 
             return MemberResponseDTO.builder()
                     .id(member.getId())
