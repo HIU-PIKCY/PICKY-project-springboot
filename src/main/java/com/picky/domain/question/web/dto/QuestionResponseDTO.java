@@ -2,6 +2,8 @@ package com.picky.domain.question.web.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.picky.domain.question.entity.Question;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +22,14 @@ public class QuestionResponseDTO {
         private int page;
         private Boolean isAI;
         private LocalDateTime createdAt;
+
+        public QuestionPostResponseDTO(Question question) {
+            this.id = question.getId();
+            this.title = question.getTitle();
+            this.content = question.getContent();
+            this.isAI = question.getIsAiGenerated();
+            this.createdAt = question.getCreatedAt();
+        }
     }
 
     @Getter
