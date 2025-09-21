@@ -2,6 +2,7 @@ package com.picky.domain.member.service;
 
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.web.dto.MemberResponseDTO;
+import com.picky.domain.member.web.dto.MyMenuResponseDTO;
 import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 
 public interface MemberService {
@@ -22,6 +23,8 @@ public interface MemberService {
      * @return MemberResponseDTO
      */
     MemberResponseDTO patchMember(Member member, PatchMemberRequestDTO request);
+
+    MyMenuResponseDTO getMyMenu(Long memberId);
 
     void validateNickname(String nickname);
 }

@@ -6,6 +6,8 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.entity.QMember;
 import com.picky.domain.member.repository.MemberRepository;
 import com.picky.domain.member.web.dto.MemberResponseDTO;
+import com.picky.domain.member.web.dto.MemberStatusDTO;
+import com.picky.domain.member.web.dto.MyMenuResponseDTO;
 import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -63,5 +65,26 @@ public class MemberServiceImpl implements MemberService {
             log.error("프로필 수정 실패", e);
             throw new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public MyMenuResponseDTO getMyMenu(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new GeneralException((ErrorStatus.MEMBER_NOT_FOUND)));
+
+        long totalBooks = member.getBookShelves().size();
+        long questions = member.getQuestions().size();
+        long answers = member.getAnswers().size();
+
+        MemberResponseDTO memberResponseDTO = MemberResponseDTO.fromEntity(member);
+        MemberStatusDTO memberStatusDTO = MemberStatusDTO.builder()
+                .totalBooks(totalBooks)
+                .questions(questions)
+                .answers(answers)
+                .build();
+
+        return MyMenuResponseDTO.builder()
+                .user(memberResponseDTO)
+                .stats(memberStatusDTO)
+                .build();
     }
 }
