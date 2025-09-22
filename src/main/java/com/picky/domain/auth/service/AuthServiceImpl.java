@@ -93,6 +93,8 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Override
+    @Transactional
     public TokenInfo reissue(String refreshToken) {
 
         if(!jwtTokenProvider.validateToken(refreshToken)) {
