@@ -5,6 +5,7 @@ import com.picky.domain.auth.CustomerUserDetails;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.service.MemberService;
 import com.picky.domain.member.web.dto.MemberResponseDTO;
+import com.picky.domain.member.web.dto.MyMenuResponseDTO;
 import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,16 @@ public class MemberController {
         Member currentMember = customerUserDetails.getMember();
         MemberResponseDTO memberResponseDTO = MemberResponseDTO.fromEntity(currentMember);
         return ApiResponse.onSuccess(memberResponseDTO);
+    }
+
+    @Operation(summary = "마이메뉴 조회 API", description = "마이메뉴에서 필요한 정보를 조회합니다.")
+    @GetMapping("/mymenu")
+    public ApiResponse<MyMenuResponseDTO> getMyMenu(
+            @AuthenticationPrincipal CustomerUserDetails customerUserDetails
+    ) {
+        Member currentMember = customerUserDetails.getMember();
+        MyMenuResponseDTO myMenuResponseDTO = memberService.getMyMenu(currentMember.getId());
+        return ApiResponse.onSuccess(myMenuResponseDTO);
     }
 
     @Operation(summary = "내 정보 수정 API", description = "현재 로그인한 사용자의 정보를 수정합니다.")
