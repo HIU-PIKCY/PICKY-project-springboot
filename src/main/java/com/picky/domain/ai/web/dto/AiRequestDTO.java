@@ -18,12 +18,5 @@ public class AiRequestDTO {
         @Schema(description = "질문 생성을 위한 주제", example = "THEME")
         public String questionType;
     }
-
-    @Data
-    public static class AiAnswerRequestDTO {
-        @NotNull(message = "질문 id는 필수값입니다.")
-        @Schema(description = "질문 id", example = "1")
-        public Long questionId;
-    }
 }
 

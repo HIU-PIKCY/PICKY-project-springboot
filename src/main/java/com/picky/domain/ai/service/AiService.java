@@ -8,9 +8,7 @@ import java.util.Optional;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
-import com.picky.domain.ai.web.dto.AiRequestDTO.AiAnswerRequestDTO;
 import com.picky.domain.ai.web.dto.AiRequestDTO.AiQuestionRequestDTO;
-import com.picky.domain.answer.entity.Answer;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;

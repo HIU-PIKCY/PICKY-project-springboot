@@ -3,7 +3,6 @@ package com.picky.domain.ai.service;
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.ai.service.AiService.AIResponseDTO;
-import com.picky.domain.ai.web.dto.AiRequestDTO.AiAnswerRequestDTO;
 import com.picky.domain.ai.web.dto.AiRequestDTO.AiQuestionRequestDTO;
 import com.picky.domain.answer.entity.Answer;
 import com.picky.domain.answer.repository.AnswerRepository;

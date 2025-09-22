@@ -2,7 +2,6 @@ package com.picky.domain.answer.web.dto;
 
 import com.picky.domain.answer.entity.Answer;
 import com.picky.domain.member.entity.Member;
-import com.picky.domain.question.entity.Question;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
