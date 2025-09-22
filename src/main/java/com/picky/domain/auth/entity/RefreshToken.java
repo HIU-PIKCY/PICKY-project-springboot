@@ -25,7 +25,7 @@ public class RefreshToken {
         this.tokenValue = tokenValue;
     }
 
-    public void updateToken(String refreshToken) { // 여기에서 해도 될 지
+    public void updateToken(String refreshToken) {
         this.tokenValue = refreshToken;
     }
 }

@@ -15,6 +15,8 @@ import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.auth.JwtTokenProvider;
 import com.picky.domain.auth.TokenInfo;
+import com.picky.domain.auth.entity.RefreshToken;
+import com.picky.domain.auth.repository.RefreshTokenRepository;
 import com.picky.domain.auth.web.dto.AuthResponseDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
@@ -30,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final FirebaseAuth firebaseAuth;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     @Transactional
@@ -43,6 +46,15 @@ public class AuthServiceImpl implements AuthService {
         );
 
         TokenInfo tokenInfo = generateToken(member);
+
+        // 리프레쉬 토큰을 DB에 저장
+        refreshTokenRepository.findByEmail(email).ifPresentOrElse(refreshToken -> {
+//            refreshTokenRepository.delete(refreshToken); // 이게 꼭 필요할까?
+            refreshToken.updateToken(tokenInfo.getRefreshToken());
+            refreshTokenRepository.save(refreshToken);
+        },
+                () -> refreshTokenRepository.save(new RefreshToken(email, tokenInfo.getRefreshToken()))
+        );
 
         return AuthResponseDTO.builder()
                 .status(AuthResponseDTO.AuthStatus.LOGIN)
@@ -72,10 +84,49 @@ public class AuthServiceImpl implements AuthService {
 
         TokenInfo tokenInfo = generateToken(newMember);
 
+        // 리프레쉬 토큰을 DB에 저장
+        refreshTokenRepository.save(new RefreshToken(email, tokenInfo.getRefreshToken()));
+
         return AuthResponseDTO.builder()
                 .status(AuthResponseDTO.AuthStatus.SIGN_UP)
                 .tokenInfo(tokenInfo)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public TokenInfo reissue(String refreshToken) {
+
+        if(!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new GeneralException(ErrorStatus._UNAUTHORIZED, "유효하지 않은 refresh token입니다.");
+        }
+
+        Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
+        String email = authentication.getName();
+
+        RefreshToken storedRefreshToken = refreshTokenRepository.findByEmail(email).orElseThrow(
+                () -> new GeneralException(ErrorStatus._UNAUTHORIZED, "로그아웃된 사용자입니다.")
+        );
+
+        if (!storedRefreshToken.getTokenValue().equals(refreshToken)) {
+            throw new GeneralException(ErrorStatus._UNAUTHORIZED, "토큰 정보가 일치하지 않습니다.");
+        }
+
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND)
+        );
+        TokenInfo tokenInfo = generateToken(member);
+
+        storedRefreshToken.updateToken(tokenInfo.getRefreshToken());
+        refreshTokenRepository.save(storedRefreshToken);
+
+        return tokenInfo;
+    }
+
+    @Override
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteByEmail(email);
     }
 
     private FirebaseToken verifyFirebaseToken(String firebaseToken) {
