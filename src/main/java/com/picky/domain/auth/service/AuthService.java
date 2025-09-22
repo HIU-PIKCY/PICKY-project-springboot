@@ -8,4 +8,5 @@ public interface AuthService {
     AuthResponseDTO login(String firebaseToken);
     AuthResponseDTO signUp(String firebaseToken, MemberSignUpRequestDTO memberSignUpRequestDTO);
     TokenInfo reissue(String refreshToken);
+    void logout(String email);
 }

@@ -123,6 +123,12 @@ public class AuthServiceImpl implements AuthService {
         return tokenInfo;
     }
 
+    @Override
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteByEmail(email);
+    }
+
     private FirebaseToken verifyFirebaseToken(String firebaseToken) {
         try {
             return firebaseAuth.verifyIdToken(firebaseToken);
