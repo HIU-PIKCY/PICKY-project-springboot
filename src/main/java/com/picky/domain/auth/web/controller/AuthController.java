@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.picky.apiPayload.ApiResponse;
+import com.picky.domain.auth.TokenInfo;
 import com.picky.domain.auth.service.AuthService;
 import com.picky.domain.auth.web.dto.AuthResponseDTO;
 import com.picky.domain.member.web.dto.MemberSignUpRequestDTO;
@@ -28,6 +29,12 @@ public class AuthController {
     public ApiResponse<AuthResponseDTO> signUp(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader, @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
         String firebaseToken = extractToken(authorizationHeader);
         return ApiResponse.onSuccess(authService.signUp(firebaseToken, memberSignUpRequestDTO));
+    }
+
+    @PostMapping("/reissue")
+    public ApiResponse<TokenInfo> reissue(@Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader) {
+        String refreshToken = extractToken(authorizationHeader);
+        return ApiResponse.onSuccess(authService.reissue(refreshToken));
     }
 
     private String extractToken(String header) {
