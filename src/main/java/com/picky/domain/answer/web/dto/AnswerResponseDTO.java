@@ -1,5 +1,7 @@
 package com.picky.domain.answer.web.dto;
 
+import com.picky.domain.answer.entity.Answer;
+import com.picky.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -41,6 +43,14 @@ public class AnswerResponseDTO {
         private String author; // 작성자 이름
         private Boolean isAI;
         private LocalDateTime createdAt;
+
+        public AnswerCreateResponseDTO(Answer answer, Member member) {
+            this.id = answer.getId();
+            this.content = answer.getContent();
+            this.author = member.getNickname();
+            this.isAI = answer.getIsAiGenerated();
+            this.createdAt = answer.getCreatedAt();
+        }
     }
 
     @Getter
