@@ -6,7 +6,8 @@ import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.auth.CustomerUserDetails;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.service.BookService;
-import com.picky.domain.book.web.dto.BookResponseDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookSearchResponseDTO;
+import com.picky.domain.book.web.dto.BookResponseDTO.BookSaveResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookIdResponseDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
@@ -30,9 +31,9 @@ public class BookController {
 
     @Operation(summary = "키워드로 책 검색 API", description = "키워드와 타입에 따른 검색 결과 목록을 조회합니다.")
     @GetMapping("/search")
-    public ApiResponse<BookResponseDTO.BookSearchResponseDTO> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
+    public ApiResponse<BookSearchResponseDTO> searchBooks(@Valid @ModelAttribute BookRequestDTO request)
     {
-        BookResponseDTO.BookSearchResponseDTO searchBooks = bookService.searchBooks(request);
+        BookSearchResponseDTO searchBooks = bookService.searchBooks(request);
         return ApiResponse.onSuccess(searchBooks);
     }
 
@@ -51,14 +52,14 @@ public class BookController {
 
     @Operation(summary = "서재에 책 추가 API", description = "책을 내 서재에 추가합니다.")
     @PostMapping()
-    public ApiResponse<BookDetailDTO> saveBookByIsbn(
+    public ApiResponse<BookSaveResponseDTO> saveBookByIsbn(
             @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
             @Valid @RequestBody AddBookRequestDTO request){
 
         Member currentMember = customerUserDetails.getMember();
-        BookDetailDTO bookDetailDTO = bookService.saveBookByIsbn(request, currentMember.getId());
+        BookSaveResponseDTO dto = bookService.saveBookByIsbn(request, currentMember.getId());
 
-        return ApiResponse.onSuccess(bookDetailDTO);
+        return ApiResponse.onSuccess(dto);
     }
 
     @Operation(summary = "ISBN으로 책 ID 조회 API", description = "ISBN으로 데이터베이스에 저장된 책의 ID를 조회합니다.")
