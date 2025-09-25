@@ -35,15 +35,18 @@ public class MemberServiceImpl implements MemberService {
 
 
     public void validateNickname(String nickname) {
-        if (memberRepository.existsByNickname(nickname)) {
+        if (memberRepository.existsByNicknameAndStatus(nickname,  DataStatus.ACTIVATED)) {
             throw new GeneralException(ErrorStatus.NICKNAME_ALREADY_USED);
         }
+    }
+
+    public boolean isNicknameAvailable(String nickname) {
+        return !memberRepository.existsByNicknameAndStatus(nickname, DataStatus.ACTIVATED);
     }
 
     @Transactional
     @Override
     public MemberResponseDTO patchMember(Member member, PatchMemberRequestDTO request) {
-        try {
             if (request.getNickname() != null) {
                 validateNickname(request.getNickname()); // 중복이면 예외 발생
                 member.setNickname(request.getNickname());
@@ -61,10 +64,6 @@ public class MemberServiceImpl implements MemberService {
                     .nickname(member.getNickname())
                     .profileImg(member.getProfileImg())
                     .build();
-        } catch(Exception e) {
-            log.error("프로필 수정 실패", e);
-            throw new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
-        }
     }
 
     @Override

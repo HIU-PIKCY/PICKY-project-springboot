@@ -8,6 +8,7 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.service.MemberService;
 import com.picky.domain.member.web.dto.MemberResponseDTO;
 import com.picky.domain.member.web.dto.MyMenuResponseDTO;
+import com.picky.domain.member.web.dto.NicknameCheckResponseDTO;
 import com.picky.domain.member.web.dto.PatchMemberRequestDTO;
 import com.picky.domain.question.service.QuestionService;
 import com.picky.domain.question.web.dto.QuestionResponseDTO;
@@ -68,7 +69,7 @@ public class MemberController {
     @GetMapping("/answers")
     public ApiResponse<AnswerResponseDTO.MyAnswersResponseDTO> getMyAnswers(
             @AuthenticationPrincipal CustomerUserDetails customerUserDetails
-    ){
+    ) {
         Member currentMember = customerUserDetails.getMember();
         return ApiResponse.onSuccess(answerService.getMyAnswers(currentMember.getId()));
     }
@@ -77,7 +78,7 @@ public class MemberController {
     @GetMapping("/questions")
     public ApiResponse<QuestionResponseDTO.MyQuestionsResponseDTO> getMyQuestions(
             @AuthenticationPrincipal CustomerUserDetails customerUserDetails
-) {
+    ) {
         Member currentMember = customerUserDetails.getMember();
         return ApiResponse.onSuccess(questionService.getMyQuestions(currentMember.getId()));
     }
@@ -86,8 +87,25 @@ public class MemberController {
     @GetMapping("/question-likes")
     public ApiResponse<QuestionLikeResponseDTO.MyLikesResponseDTO> getMyLikes(
             @AuthenticationPrincipal CustomerUserDetails customerUserDetails
-) {
+    ) {
         Member currentMember = customerUserDetails.getMember();
         return ApiResponse.onSuccess(questionLikeService.getMyLikes(currentMember.getId()));
+    }
+
+    @Operation(summary = "닉네임 중복 검사 API", description = "닉네임 중복 여부를 조회합니다.")
+    @GetMapping("/check-nickname")
+    public ApiResponse<NicknameCheckResponseDTO> checkNicknameDuplicate(
+            @Parameter(description = "검사할 닉네임", example = "피키")
+            @RequestParam String nickname
+    ) {
+        boolean isAvailable = memberService.isNicknameAvailable(nickname);
+
+        NicknameCheckResponseDTO response = NicknameCheckResponseDTO.builder()
+                .nickname(nickname)
+                .isAvailable(isAvailable)
+                .message(isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용 중인 닉네임입니다.")
+                .build();
+
+        return ApiResponse.onSuccess(response);
     }
 }
