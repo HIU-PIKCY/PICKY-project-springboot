@@ -27,6 +27,4 @@ public interface MemberService {
     MyMenuResponseDTO getMyMenu(Long memberId);
 
     void validateNickname(String nickname);
-
-    boolean isNicknameAvailable(String nickname);
 }

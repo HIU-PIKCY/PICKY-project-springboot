@@ -112,27 +112,6 @@ public class BookResponseDTO{
 
     @Getter
     @Setter
-    @SuperBuilder
-    @Schema(description = "내 서재 추가 응답 DTO")
-    public static class BookSaveResponseDTO extends BookDetailDTO{
-        @Schema(description = "서재 id", example = "1")
-        private Long bookShelfId;
-
-        public static BookSaveResponseDTO fromEntity(Book book) {
-            return BookSaveResponseDTO.builder()
-                    .title(book.getTitle())
-                    .authors(Collections.singletonList(book.getAuthor()))
-                    .publisher(book.getPublisher())
-                    .coverImage(book.getCoverImage())
-                    .isbn(book.getIsbn())
-                    .publishedAt(String.valueOf(book.getPublishedAt()))
-                    .pageCount(book.getPageCount())
-                    .build();
-        }
-    }
-
-    @Getter
-    @Setter
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor

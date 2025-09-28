@@ -9,7 +9,6 @@ import com.picky.domain.book.web.dto.BookResponseDTO.BookDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO;
-import com.picky.domain.book.web.dto.BookResponseDTO.BookSaveResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookSearchResponseDTO;
 
 import java.time.LocalDate;
@@ -35,9 +34,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
-    private final WebClient webClient;
-    private final JPAQueryFactory queryFactory;
-    private final BookRepository bookRepository;
+  private final WebClient webClient;
+  private final JPAQueryFactory queryFactory;
+  private final BookRepository bookRepository;
     private final BookShelfServiceImpl bookShelfService;
 
     @Override
@@ -48,13 +47,13 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book save(Book book) {
+    public Book save(Book book){
         return bookRepository.save(book);
     }
 
 
     @Value("${aladin.api.key}")
-    private String aladinApiKey;
+  private String aladinApiKey;
 
     @Override
     public BookSearchResponseDTO searchBooks(BookRequestDTO request) {
@@ -68,7 +67,7 @@ public class BookServiceImpl implements BookService {
         int maxResults = request.getSize();
 
         String uri = "https://www.aladin.co.kr/ttb/api/ItemSearch.aspx"
-                + "?ttbkey={apiKey}&Query={query}&QueryType={type}&MaxResults={maxResults}&start={start}&SearchTarget=Book&output=js" + "&Version=20131101" + "&Sort=SalesPoint";
+                + "?ttbkey={apiKey}&Query={query}&QueryType={type}&MaxResults={maxResults}&start={start}&SearchTarget=Book&output=js"+"&Version=20131101"+ "&Sort=SalesPoint";
 
         BookResponseDTO response = webClient.get()
                 .uri(uri, aladinApiKey, request.getKeyword(), queryType, maxResults, start)
@@ -76,32 +75,32 @@ public class BookServiceImpl implements BookService {
                 .bodyToMono(BookResponseDTO.class)
                 .block();
 
-        List<BookDTO> dtos = Optional.ofNullable(response)
-                .map(BookResponseDTO::getItem) // response가 null이면 빈 리스트 처리
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(Objects::nonNull)
-                .map(item -> {
-                    // authors 필드에서 괄호 안 내용 제거하고 trim
-                    List<String> authors = Optional.ofNullable(item.getAuthor())
-                            .map(s -> Arrays.stream(s.split(","))
-                                    .map(String::trim)
-                                    .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 등 제거
-                                    .findFirst()
-                                    .map(List::of)
-                                    .orElse(Collections.emptyList())
-                            ).orElse(Collections.emptyList());
+      List<BookDTO> dtos = Optional.ofNullable(response)
+              .map(BookResponseDTO::getItem) // response가 null이면 빈 리스트 처리
+              .orElse(Collections.emptyList())
+              .stream()
+              .filter(Objects::nonNull)
+              .map(item -> {
+                  // authors 필드에서 괄호 안 내용 제거하고 trim
+                  List<String> authors = Optional.ofNullable(item.getAuthor())
+                          .map(s -> Arrays.stream(s.split(","))
+                                  .map(String::trim)
+                                  .map(a -> a.replaceAll("\\(.*?\\)", "")) // (지은이), (옮긴이) 등 제거
+                                  .findFirst()
+                                  .map(List::of)
+                                  .orElse(Collections.emptyList())
+                          ).orElse(Collections.emptyList());
 
-                    return BookDTO.builder()
-                            .title(item.getTitle())
-                            .authors(authors)
-                            .publisher(item.getPublisher())
-                            .coverImage(item.getCover())
-                            .isbn(item.getIsbn13())
-                            .publishedAt(item.getPubDate())
-                            .build();
-                })
-                .collect(Collectors.toList());
+                  return BookDTO.builder()
+                          .title(item.getTitle())
+                          .authors(authors)
+                          .publisher(item.getPublisher())
+                          .coverImage(item.getCover())
+                          .isbn(item.getIsbn13())
+                          .publishedAt(item.getPubDate())
+                          .build();
+              })
+              .collect(Collectors.toList());
 
         int totalCount = Optional.ofNullable(response)
                 .map(BookResponseDTO::getTotalResults)
@@ -114,7 +113,7 @@ public class BookServiceImpl implements BookService {
         result.setHasNext(hasNext);
 
         return result;
-    }
+  }
 
     @Override
     public BookDetailDTO getBookDetailByIsbn(String isbn, Long memberId) {
@@ -178,7 +177,7 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = false)
     @Override
-    public BookSaveResponseDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId) {
+    public BookDetailDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId) {
         BookDetailDTO bookDTO = getBookDetailByIsbn(request.isbn, memberId);
 
         Book book = findByIsbn(request.getIsbn());
@@ -200,31 +199,25 @@ public class BookServiceImpl implements BookService {
         }
 
         // BookShelf에 추가 여부 확인
-        BookShelf bookShelf = bookShelfService.findByMemberIdAndBookId(memberId, request.isbn);
+        BookShelf existingShelf = bookShelfService.findByMemberIdAndBookId(memberId, request.isbn);
 
-        if (bookShelf != null) {
-            if (bookShelf.getStatus() == DataStatus.ACTIVATED) {
-                throw new GeneralException(ErrorStatus.ALREADY_ADDED);
-            } else if (bookShelf.getStatus() == DataStatus.DEACTIVATED) {
-                // DEACTIVATED 상태인 경우 ACTIVATED로 변경
-                bookShelf.setStatus(DataStatus.ACTIVATED);
-                bookShelf.setReadingStatus(ReadingStatus.valueOf(request.status));
-                bookShelfService.save(bookShelf);
-            }
-        } else {
+        if (existingShelf != null) {
+            throw new GeneralException(ErrorStatus.ALREADY_ADDED);
+        }
             // 새 서재 엔티티 생성
-            bookShelf = BookShelf.builder()
+            BookShelf shelf = BookShelf.builder()
                     .book(book)
                     .member(Member.builder().id(memberId).build())
                     .readingStatus(ReadingStatus.valueOf(request.status))
                     .build();
-            bookShelfService.save(bookShelf);
-        }
 
-        BookSaveResponseDTO dto = BookSaveResponseDTO.fromEntity(book);
-        dto.setIsInLibrary(true);
-        dto.setReadingStatus(bookShelf.getReadingStatus());
-        dto.setBookShelfId(bookShelf.getId());
-        return dto;
+            bookShelfService.save(shelf);
+
+        // DTO 반환
+        BookDetailDTO detailDTO = BookDetailDTO.fromEntity(book);
+        detailDTO.setIsInLibrary(true);
+        detailDTO.setReadingStatus(ReadingStatus.valueOf(request.status));
+
+        return detailDTO;
     }
 }

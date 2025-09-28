@@ -1,7 +1,6 @@
 package com.picky.domain.book.service;
 
 import com.picky.domain.book.entity.Book;
-import com.picky.domain.book.web.dto.BookResponseDTO.BookSaveResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookSearchResponseDTO;
 import com.picky.domain.book.web.dto.BookResponseDTO.BookDetailDTO;
 import com.picky.domain.book.web.dto.BookRequestDTO;
@@ -41,7 +40,7 @@ public interface BookService {
      * @param memberId 사용자 id
      * @return BookDetailDTO 책 상세 정보
      */
-    BookSaveResponseDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId);
+    BookDetailDTO saveBookByIsbn(AddBookRequestDTO request, Long memberId);
 
     /**
      * 책을 상세 조회합니다.

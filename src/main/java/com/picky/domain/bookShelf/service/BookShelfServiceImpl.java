@@ -41,15 +41,13 @@ public class BookShelfServiceImpl implements BookShelfService{
         return bookShelfEntity.orElse(null);
     }
 
-    // region 사용자와 책으로 서재 조회
-    // DATASTATUS에 상관없이 조회함
     @Override
     public BookShelf findByMemberIdAndBookId(Long memberId, String isbn) {
-        BooleanExpression predicate = QBookShelf.bookShelf.member.id.eq(memberId).and(QBook.book.isbn.eq(isbn));
+        BooleanExpression predicate = QBookShelf.bookShelf.member.id.eq(memberId).and(QBook.book.isbn.eq(isbn)).and(QBookShelf.bookShelf.status.eq(DataStatus.ACTIVATED));
         Optional<BookShelf> bookShelfEntity = bookShelfRepository.findOne(predicate);
         return bookShelfEntity.orElse(null);
     }
-    // endregion
+
     @Override
     public BookShelf save(BookShelf bookShelf){
         return bookShelfRepository.save(bookShelf);

@@ -6,7 +6,9 @@ import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestD
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,14 @@ public class QuestionController {
     @GetMapping("/books/{bookId}/questions")
     public ApiResponse<QuestionListResponseDTO> getQuestionList(@PathVariable Long bookId) {
         return ApiResponse.onSuccess(questionService.getQuestionList(bookId));
+    }
+
+    @Operation(summary = "사용자 질문 목록 조회 API", description = "특정 사용자가 작성한 모든 질문 목록을 조회합니다.")
+    @GetMapping("/members/{memberId}/questions")
+    public ApiResponse<MyQuestionsResponseDTO> getMyQuestions(
+            @Parameter(description = "조회할 사용자 ID", example = "1")
+            @PathVariable Long memberId) {
+        return ApiResponse.onSuccess(questionService.getMyQuestions(memberId));
     }
 
     @Operation(summary = "질문 삭제 API", description = "특정 질문을 삭제합니다.")
