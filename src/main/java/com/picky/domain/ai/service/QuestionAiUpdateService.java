@@ -10,6 +10,7 @@ import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.question.entity.Question;
+import com.picky.domain.question.entity.enums.QuestionType;
 import com.picky.domain.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +41,15 @@ public class QuestionAiUpdateService {
         Book book = bookRepository.findById(request.getBookId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND));
 
+        QuestionType questionType = QuestionType.valueOf(request.getQuestionType().toUpperCase());
+
         Question question = Question.builder()
                 .book(book)
                 .member(member)
                 .title(dto.title())
                 .content(dto.content())
                 .isAiGenerated(true)
+                .type(questionType)
                 .build();
 
         return questionRepository.save(question);

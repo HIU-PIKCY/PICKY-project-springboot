@@ -59,7 +59,7 @@ public class Question extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   @Builder.Default
-  private QuestionType type = QuestionType.THEME;
+  private QuestionType type = QuestionType.CHARACTER;
 
   @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
   @Builder.Default
