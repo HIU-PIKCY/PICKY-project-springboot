@@ -3,6 +3,7 @@ package com.picky.domain.member.repository;
 import java.util.Optional;
 
 import com.picky.domain.member.entity.Member;
+import com.picky.global.enums.DataStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,5 @@ public interface MemberRepository extends JpaRepository<Member, Long>,
      * @param nickname 회원 닉네임
      * @return 닉네임이 존재하면 true, 없으면 false 반환
      */
-    boolean existsByNickname(String nickname);
-
+    boolean existsByNicknameAndStatus(String nickname,  DataStatus status);
 }
