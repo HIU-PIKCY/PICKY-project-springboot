@@ -15,7 +15,7 @@ public class AiRequestDTO {
         public Long bookId;
 
         @NotNull(message = "주제는 필수값입니다.")
-        @Schema(description = "질문 생성을 위한 주제", example = "CHARACTER")
+        @Schema(description = "질문 생성을 위한 주제", example = "THEME")
         public String questionType;
     }
 }
