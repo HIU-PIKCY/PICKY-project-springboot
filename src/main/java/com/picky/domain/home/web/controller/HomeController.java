@@ -5,6 +5,7 @@ import com.picky.domain.ai.scheduler.AiSummaryScheduler;
 import com.picky.domain.home.service.HomeService;
 import com.picky.domain.home.web.dto.HomeResponseDTO.HotTopicResponseDTO;
 import com.picky.domain.home.web.dto.HomeResponseDTO.MostQuestionedBooksResponseDTO;
+import com.picky.domain.home.web.dto.HomeResponseDTO.WeeklyKeywordResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,11 @@ public class HomeController {
     @GetMapping("/most-questioned-books")
     public ApiResponse<MostQuestionedBooksResponseDTO>  getMostQuestionedBooks() {
         return ApiResponse.onSuccess(homeService.getMostQuestionedBooks());
+    }
+
+    @Operation(summary = "이번 주 키워드 TOP 3 조회 API", description = "지난주에 가장 많이 언급된 키워드 3개를 순위와 함께 조회합니다.")
+    @GetMapping("/weekly-keywords")
+    public ApiResponse<WeeklyKeywordResponseDTO> getWeeklyKeywords() {
+        return ApiResponse.onSuccess(homeService.getWeeklyTopKeywords());
     }
 }

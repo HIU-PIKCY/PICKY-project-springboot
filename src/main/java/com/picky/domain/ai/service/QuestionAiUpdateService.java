@@ -9,11 +9,20 @@ import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
+import com.picky.domain.question.entity.AiHashtag;
 import com.picky.domain.question.entity.Question;
+import com.picky.domain.question.entity.QuestionKeyword;
+import com.picky.domain.question.entity.enums.Keyword;
 import com.picky.domain.question.entity.enums.QuestionType;
+import com.picky.domain.question.repository.QuestionKeywordRepository;
 import com.picky.domain.question.repository.QuestionRepository;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +35,7 @@ public class QuestionAiUpdateService {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final BookRepository bookRepository;
-
-    @Transactional
-    public void updateQuestionWithAiAnalysis(Long questionId, AIResponseDTO response) {
-
-        Question question = questionRepository.findById(questionId)
-                                              .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
-
-        question.updateAIAnalysis(response.summary(), response.hashtags());
-    }
+    private final QuestionKeywordRepository questionKeywordRepository;
 
     @Transactional
     public Question saveGeneratedQuestion(AiQuestionRequestDTO request, Member member, AiService.GeneratedQuestionDTO dto) {
@@ -68,5 +69,43 @@ public class QuestionAiUpdateService {
                 .build();
 
         return answerRepository.save(answer);
+    }
+
+    @Transactional
+    public void saveKeywords(Long questionId, List<String> keywordStrings) {
+        Question question = questionRepository.findById(questionId)
+                                              .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        if (keywordStrings != null) {
+            List<QuestionKeyword> questionKeywords = keywordStrings.stream()
+                                                                   .map(keywordStr -> {
+                                                                       Keyword keywordEnum = Keyword.fromPromptValue(keywordStr);
+                                                                       if (keywordEnum != null) {
+                                                                           return QuestionKeyword.builder()
+                                                                                                 .question(question)
+                                                                                                 .keyword(keywordEnum)
+                                                                                                 .build();
+                                                                       }
+                                                                       return null;
+                                                                   })
+                                                                   .filter(Objects::nonNull)
+                                                                   .collect(Collectors.toList());
+
+            questionKeywordRepository.saveAll(questionKeywords);
+            log.info("질문 ID {} 에 대한 키워드 저장 완료", questionId);
+        }
+    }
+
+    @Transactional
+    public void updateQuestionWithAiAnalysis(Long questionId, AIResponseDTO response) {
+        Question question = questionRepository.findById(questionId)
+                                              .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        List<AiHashtag> hashtags = Arrays.stream(response.hashtags().split(","))
+                                         .map(String::trim)
+                                         .map(tag -> AiHashtag.builder().question(question).tag(tag).build())
+                                         .collect(Collectors.toList());
+
+        question.updateAIAnalysis(response.summary(), hashtags);
     }
 }

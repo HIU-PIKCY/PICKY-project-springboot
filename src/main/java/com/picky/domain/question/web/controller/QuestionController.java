@@ -1,6 +1,7 @@
 package com.picky.domain.question.web.controller;
 
 import com.picky.apiPayload.ApiResponse;
+import com.picky.domain.auth.CustomerUserDetails;
 import com.picky.domain.question.service.QuestionService;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,17 +29,19 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @Operation(summary = "질문 등록 API", description = "사람이 질문을 등록합니다.")
-    @PostMapping("/books/{bookId}/questions/{memberId}")
+    @PostMapping("/books/{bookId}/questions")
     public ApiResponse<QuestionPostResponseDTO> createQuestion(@PathVariable Long bookId,
-                                                               @PathVariable Long memberId,
+                                                               @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
                                                                @Valid @RequestBody QuestionPostRequestDTO request) {
+        Long memberId = customerUserDetails.getMember().getId();
         return ApiResponse.onSuccess(questionService.createQuestion(bookId, memberId, request));
     }
 
     @Operation(summary = "질문 상세 조회 API", description = "질문 상세 정보를 조회합니다.")
-    @GetMapping("/questions/{questionId}/{memberId}")
+    @GetMapping("/questions/{questionId}")
     public ApiResponse<QuestionDetailResponseDTO> getQuestionDetail(@PathVariable Long questionId,
-                                                                    @PathVariable Long memberId) {
+                                                                    @AuthenticationPrincipal CustomerUserDetails customerUserDetails) {
+        Long memberId = customerUserDetails.getMember().getId();
         return ApiResponse.onSuccess(questionService.getQuestionDetail(questionId, memberId));
     }
 
@@ -48,11 +52,12 @@ public class QuestionController {
     }
 
     @Operation(summary = "질문 삭제 API", description = "특정 질문을 삭제합니다.")
-    @DeleteMapping("/questions/{questionId}/{memberId}")
+    @DeleteMapping("/questions/{questionId}")
     public ApiResponse<String> deleteQuestion(
             @PathVariable Long questionId,
-            @PathVariable Long memberId
+            @AuthenticationPrincipal CustomerUserDetails customerUserDetails
     ) {
+        Long memberId = customerUserDetails.getMember().getId();
         questionService.deleteQuestion(questionId, memberId);
         return ApiResponse.onSuccess("질문이 성공적으로 삭제되었습니다.");
     }

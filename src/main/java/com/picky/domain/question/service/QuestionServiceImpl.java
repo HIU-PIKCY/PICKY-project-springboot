@@ -2,7 +2,8 @@ package com.picky.domain.question.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
-import com.picky.domain.answer.repository.AnswerRepository;
+import com.picky.domain.ai.service.AiService;
+import com.picky.domain.ai.service.QuestionAiUpdateService;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
@@ -11,13 +12,13 @@ import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionDTO;
+import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionDetailResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionInfoResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
 import com.picky.domain.questionLike.repository.QuestionLikeRepository;
-import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionsResponseDTO;
-import com.picky.domain.question.web.dto.QuestionResponseDTO.MyQuestionDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,10 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class QuestionServiceImpl implements QuestionService {
 
+    private final AiService aiService;
     private final QuestionRepository questionRepository;
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
     private final QuestionLikeRepository questionLikeRepository;
+    private final QuestionAiUpdateService questionAiUpdateService;
 
     @Override
     @Transactional
@@ -56,14 +59,13 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question savedQuestion = questionRepository.save(question);
 
-        return QuestionPostResponseDTO.builder()
-                .id(savedQuestion.getId())
-                .title(savedQuestion.getTitle())
-                .content(savedQuestion.getContent())
-                .page(savedQuestion.getPageNum())
-                .isAI(savedQuestion.getIsAiGenerated())
-                .createdAt(savedQuestion.getCreatedAt())
-                .build();
+        aiService.getKeywords(savedQuestion.getTitle(), savedQuestion.getContent())
+                 // 2. 응답이 오면(비동기), 그 결과를 가지고 DB 저장 서비스를 호출
+                 .subscribe(keywords ->
+                     questionAiUpdateService.saveKeywords(savedQuestion.getId(), keywords)
+                 );
+
+        return new QuestionPostResponseDTO(savedQuestion);
     }
 
     @Override
@@ -145,14 +147,18 @@ public class QuestionServiceImpl implements QuestionService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
+        Member author = question.getMember();
+
         // 좋아요 여부 확인
         Boolean isLiked = questionLikeRepository.existsByMemberAndQuestion(member, question);
+        boolean isAuthor = author.getId().equals(memberId);
 
         return QuestionDetailResponseDTO.builder()
                 .id(question.getId())
                 .profileImg(question.getMember().getProfileImg())
                 .title(question.getTitle())
                 .content(question.getContent())
+                .authorId(author.getId())
                 .author(question.getMember().getNickname())
                 .isAI(question.getIsAiGenerated())
                 .views(question.getViews())
@@ -166,6 +172,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .author(question.getBook().getAuthor())
                         .build())
                 .isLiked(isLiked)
+                .isAuthor(isAuthor)
                 .build();
     }
 

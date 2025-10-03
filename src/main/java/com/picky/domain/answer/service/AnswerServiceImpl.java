@@ -116,7 +116,7 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public AnswerListResponseDTO getAnswersByQuestion(Long questionId, String sort) {
+    public AnswerListResponseDTO getAnswersByQuestion(Long questionId, Long memberId, String sort) {
 
         questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
@@ -127,7 +127,7 @@ public class AnswerServiceImpl implements AnswerService {
             .filter(a -> a.getParentAnswer() != null) // 이건 전부 대댓글
             .collect(Collectors.groupingBy(
                 a -> a.getParentAnswer().getId(), // 부모 댓글 id 기준으로 묶기
-                Collectors.mapping(this::convertToAnswerInfoDTO, Collectors.toList())
+                Collectors.mapping(a -> convertToAnswerInfoDTO(a, memberId), Collectors.toList())
             ));
 
         // 부모 댓글만 필터링
@@ -142,15 +142,18 @@ public class AnswerServiceImpl implements AnswerService {
 
         // DTO 변환
         List<AnswerInfoResponseDTO> responseDTOs = parentStream
-            .map(parent -> AnswerInfoResponseDTO.builder()
+            .map(parent -> {boolean isAuthor = parent.getMember().getId().equals(memberId);
+                return AnswerInfoResponseDTO.builder()
                                                 .id(parent.getId())
                                                 .content(parent.getContent())
+                                                .authorId(parent.getMember().getId())
                                                 .author(parent.getMember().getNickname())
                                                 .profileImg(parent.getMember().getProfileImg())
                                                 .isAI(parent.getIsAiGenerated())
                                                 .createdAt(parent.getCreatedAt())
+                                                .isAuthor(isAuthor)
                                                 .childrenAnswers(childrenMap.getOrDefault(parent.getId(), Collections.emptyList())) // 대댓글은 항상 오래된순
-                                                .build()
+                                                .build();}
             )
             .collect(Collectors.toList());
 
@@ -159,14 +162,18 @@ public class AnswerServiceImpl implements AnswerService {
                 .build();
     }
 
-    private AnswerInfoResponseDTO convertToAnswerInfoDTO(Answer answer) {
+    private AnswerInfoResponseDTO convertToAnswerInfoDTO(Answer answer, Long memberId) {
+        boolean isAuthor = answer.getMember().getId().equals(memberId);
+
         return AnswerInfoResponseDTO.builder()
                 .id(answer.getId())
                 .content(answer.getContent())
+                .authorId(answer.getMember().getId())
                 .author(answer.getMember().getNickname())
                 .profileImg(answer.getMember().getProfileImg())
                 .isAI(answer.getIsAiGenerated())
                 .createdAt(answer.getCreatedAt())
+                .isAuthor(isAuthor)
                 .childrenAnswers(Collections.emptyList())
                 .build();
     }
