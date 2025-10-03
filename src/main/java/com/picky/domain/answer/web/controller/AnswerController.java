@@ -5,11 +5,13 @@ import com.picky.domain.answer.service.AnswerService;
 import com.picky.domain.answer.web.dto.AnswerRequestDTO.AnswerCreateRequestDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerListResponseDTO;
+import com.picky.domain.auth.CustomerUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,12 +30,13 @@ public class AnswerController {
     private final AnswerService answerService;
 
     @Operation(summary = "답변 등록 API", description = "특정 질문에 대한 답변을 등록합니다.")
-    @PostMapping("/questions/{questionId}/answers/{memberId}")
+    @PostMapping("/questions/{questionId}/answers")
     public ApiResponse<AnswerCreateResponseDTO> createAnswer(
         @PathVariable Long questionId,
-        @PathVariable Long memberId,
+        @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
         @Valid @RequestBody AnswerCreateRequestDTO request
     ) {
+        Long memberId = customerUserDetails.getMember().getId();
         return ApiResponse.onSuccess(answerService.createAnswer(questionId, memberId, request));
     }
 
@@ -44,11 +47,12 @@ public class AnswerController {
     }
 
     @Operation(summary = "답변 삭제 API", description = "특정 답변을 삭제합니다.")
-    @DeleteMapping("/answers/{answerId}/{memberId}")
+    @DeleteMapping("/answers/{answerId}")
     public ApiResponse<String> deleteAnswer(
         @PathVariable Long answerId,
-        @PathVariable Long memberId
+        @AuthenticationPrincipal CustomerUserDetails customerUserDetails
     ) {
+        Long memberId = customerUserDetails.getMember().getId();
         answerService.deleteAnswer(answerId, memberId);
         return ApiResponse.onSuccess("답변이 성공적으로 삭제되었습니다.");
     }
