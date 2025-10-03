@@ -74,6 +74,7 @@ public class BookResponseDTO{
         private String isbn13;
         private String pubDate;
         private SubInfo subInfo;
+        private String description;
     }
 
     @Data
