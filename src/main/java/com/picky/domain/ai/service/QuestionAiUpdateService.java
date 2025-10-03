@@ -71,7 +71,6 @@ public class QuestionAiUpdateService {
         return answerRepository.save(answer);
     }
 
-    @Async
     @Transactional
     public void saveKeywords(Long questionId, List<String> keywordStrings) {
         Question question = questionRepository.findById(questionId)
@@ -80,7 +79,6 @@ public class QuestionAiUpdateService {
         if (keywordStrings != null) {
             List<QuestionKeyword> questionKeywords = keywordStrings.stream()
                                                                    .map(keywordStr -> {
-                                                                       // Keyword Enum에 추가한 헬퍼 메서드 사용
                                                                        Keyword keywordEnum = Keyword.fromPromptValue(keywordStr);
                                                                        if (keywordEnum != null) {
                                                                            return QuestionKeyword.builder()
@@ -94,7 +92,7 @@ public class QuestionAiUpdateService {
                                                                    .collect(Collectors.toList());
 
             questionKeywordRepository.saveAll(questionKeywords);
-            log.info("[Async] 질문 ID {} 에 대한 키워드 저장 완료", questionId);
+            log.info("질문 ID {} 에 대한 키워드 저장 완료", questionId);
         }
     }
 

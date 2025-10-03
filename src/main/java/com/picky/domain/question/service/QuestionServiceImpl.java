@@ -59,11 +59,11 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question savedQuestion = questionRepository.save(question);
 
-        // 1. AiService를 호출해 키워드를 받아옴 (Mono를 블로킹 방식으로 처리)
-        List<String> keywords = aiService.getKeywords(savedQuestion.getTitle(), savedQuestion.getContent()).block();
-
-        // 2. 비동기로 DB에 저장
-        questionAiUpdateService.saveKeywords(savedQuestion.getId(), keywords);
+        aiService.getKeywords(savedQuestion.getTitle(), savedQuestion.getContent())
+                 // 2. 응답이 오면(비동기), 그 결과를 가지고 DB 저장 서비스를 호출
+                 .subscribe(keywords ->
+                     questionAiUpdateService.saveKeywords(savedQuestion.getId(), keywords)
+                 );
 
         return new QuestionPostResponseDTO(savedQuestion);
     }
@@ -147,14 +147,18 @@ public class QuestionServiceImpl implements QuestionService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
+        Member author = question.getMember();
+
         // 좋아요 여부 확인
         Boolean isLiked = questionLikeRepository.existsByMemberAndQuestion(member, question);
+        boolean isAuthor = author.getId().equals(memberId);
 
         return QuestionDetailResponseDTO.builder()
                 .id(question.getId())
                 .profileImg(question.getMember().getProfileImg())
                 .title(question.getTitle())
                 .content(question.getContent())
+                .authorId(author.getId())
                 .author(question.getMember().getNickname())
                 .isAI(question.getIsAiGenerated())
                 .views(question.getViews())
@@ -168,6 +172,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .author(question.getBook().getAuthor())
                         .build())
                 .isLiked(isLiked)
+                .isAuthor(isAuthor)
                 .build();
     }
 

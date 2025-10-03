@@ -41,6 +41,7 @@ public class QuestionResponseDTO {
         private String profileImg; // 작성자 프로필 이미지
         private String title;
         private String content;
+        private Long authorId;
         private String author; // 멤버 (질문 작성자)
         private Boolean isAI;
         private int views;
@@ -50,6 +51,7 @@ public class QuestionResponseDTO {
         private LocalDateTime createdAt;
         private BookInfoResponseDTO book; // 관련 책 정보
         private Boolean isLiked; // 사용자가 좋아요를 눌렀는지 여부
+        private Boolean isAuthor;
     }
 
     @Getter

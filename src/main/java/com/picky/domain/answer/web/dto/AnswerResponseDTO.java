@@ -68,10 +68,12 @@ public class AnswerResponseDTO {
     public static class AnswerInfoResponseDTO {
         private Long id;
         private String content;
+        private Long authorId;
         private String author; // 작성자 이름
         private String profileImg; // 작성자 프로필 이미지
         private Boolean isAI;
         private LocalDateTime createdAt;
+        private Boolean isAuthor;
         @Schema(description = "대댓글 목록")
         private List<AnswerInfoResponseDTO> childrenAnswers; // 대댓글 목록
     }
