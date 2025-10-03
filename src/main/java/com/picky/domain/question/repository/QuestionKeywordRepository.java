@@ -1,5 +1,6 @@
 package com.picky.domain.question.repository;
 
+import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.entity.QuestionKeyword;
 import com.picky.domain.question.entity.enums.Keyword;
 import java.time.LocalDateTime;
@@ -27,4 +28,34 @@ public interface QuestionKeywordRepository extends JpaRepository<QuestionKeyword
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate
     );
+
+    /**
+     * 특정 사용자의 가장 많이 사용된 키워드를 조회합니다.
+     */
+    @Query("SELECT qk FROM QuestionKeyword qk " +
+            "JOIN FETCH qk.question q " +
+            "WHERE q.member.id = :memberId")
+    List<QuestionKeyword> findByQuestionMemberId(@Param("memberId") Long memberId);
+
+    /**
+     * 특정 키워드를 가진 다른 사용자들의 질문을 조회합니다.
+     */
+    @Query("SELECT qk FROM QuestionKeyword qk " +
+            "JOIN FETCH qk.question q " +
+            "WHERE qk.keyword = :keyword " +
+            "AND q.member.id != :excludeMemberId " +
+            "AND q.book IS NOT NULL")
+    List<QuestionKeyword> findByKeywordAndQuestionMemberIdNot(
+            @Param("keyword") Keyword keyword,
+            @Param("excludeMemberId") Long excludeMemberId
+    );
+
+    /**
+    해당 키워드를 사용한 모든 사용자의 질문을 가져옵니다.
+     */
+    @Query("SELECT qk FROM QuestionKeyword qk " +
+            "JOIN FETCH qk.question q " +
+            "WHERE qk.keyword = :keyword " +
+            "AND q.book IS NOT NULL")
+    List<QuestionKeyword> findByKeyword(@Param("keyword") Keyword keyword);
 }

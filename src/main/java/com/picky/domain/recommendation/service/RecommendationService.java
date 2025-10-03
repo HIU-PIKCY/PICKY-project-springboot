@@ -1,6 +1,6 @@
 package com.picky.domain.recommendation.service;
 
-import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO;
+import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationDTO;
 
 public interface RecommendationService {
 
@@ -10,5 +10,5 @@ public interface RecommendationService {
          * @param memberId 로그인한 회원 ID
          * @return 책 응답 DTO
          */
-        RecommendationResponseDTO recommendBookBasedOnKeywords(Long memberId);
+        BookRecommendationDTO recommendBookBasedOnKeywords(Long memberId);
 }
