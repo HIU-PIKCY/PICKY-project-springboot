@@ -2,7 +2,6 @@ package com.picky.domain.question.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
-import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
@@ -50,7 +49,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .pageNum(request.getPage())
-                .isAiGenerated(false)
+                .isAiGenerated(request.getIsAI())
                 .member(member)
                 .build();
 

@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -207,11 +206,11 @@ public class AiService {
                         String title = inner.path("title").asText();
                         String questionContent = inner.path("content").asText();
 
-                        GeneratedQuestionDTO dto = new GeneratedQuestionDTO(title, questionContent);
-
-                        return Mono.fromCallable(() -> questionAiUpdateService.saveGeneratedQuestion(request, member, dto))
-                                .subscribeOn(Schedulers.boundedElastic())
-                                .map(QuestionPostResponseDTO::new);
+                        return Mono.just(QuestionPostResponseDTO.builder()
+                                .title(title)
+                                .content(questionContent)
+                                .isAI(true)
+                                .build());
                     } catch (Exception e) {
                         log.error("Failed to parse generated question response: {}", responseBody, e);
                         return Mono.error(e);
