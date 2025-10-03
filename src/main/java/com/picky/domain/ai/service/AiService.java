@@ -1,7 +1,10 @@
 package com.picky.domain.ai.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.picky.domain.question.entity.enums.Keyword;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +19,7 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -317,4 +321,71 @@ public class AiService {
     }
     public record GeneratedAnswerDTO(String content) {}
 
+    public Mono<List<String>> getKeywords(String questionTitle, String questionContent) {
+        String prompt = createKeywordPrompt(questionTitle, questionContent);
+
+        List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
+        Map<String, Object> body = Map.of(
+            "model", "gpt-3.5-turbo",
+            "messages", messages,
+            "temperature", 0.2
+        );
+
+        return webClient.post()
+                        .uri(OPENAI_API_URL)
+                        .header("Authorization", "Bearer " + apiKey)
+                        .bodyValue(body)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .flatMap(responseBody -> {
+                            log.info("OpenAI Raw Response (Keywords): {}", responseBody);
+                            try {
+                                JsonNode root = objectMapper.readTree(responseBody);
+                                String content = root.path("choices").get(0).path("message").path("content").asText();
+
+                                int startIndex = content.indexOf('[');
+                                int endIndex = content.lastIndexOf(']');
+
+                                if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+                                    String jsonArrayString = content.substring(startIndex, endIndex + 1);
+                                    List<String> keywords = objectMapper.readValue(jsonArrayString, new TypeReference<>() {});
+                                    log.info("Successfully parsed keywords: {}", keywords);
+                                    return Mono.just(keywords);
+                                } else {
+                                    // 만약 응답에서 '[' 와 ']'를 찾지 못하면 에러를 발생
+                                    log.error("Could not find a valid JSON array in the content: {}", content);
+                                    return Mono.error(new Exception("Invalid JSON format from AI: " + content));
+                                }
+
+                            } catch (Exception e) {
+                                log.error("Failed to parse keywords response: {}", responseBody, e);
+                                return Mono.error(e);
+                            }
+                        });
+    }
+
+    private String createKeywordPrompt(String questionTitle, String questionContent) {
+        // Keyword Enum에 추가한 헬퍼 메서드 사용
+        String keywordList = Keyword.getPromptValuesAsString();
+
+        return String.format(
+            """
+            [지시]
+            다음 [질문]을 분석하고, 아래 [키워드 목록]에서 가장 관련성 높은 키워드를 정확히 3개만 선택해주세요.
+
+            [질문 제목]
+            %s
+
+            [질문 내용]
+            %s
+
+            [키워드 목록]
+            %s
+
+            [출력 형식]
+            - ["키워드1", "키워드2", "키워드3"] 형태의 JSON 배열로만 응답해주세요.
+            - 다른 설명은 절대 추가하지 마세요.
+            """, questionTitle, questionContent, keywordList
+        );
+    }
 }

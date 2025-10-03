@@ -54,7 +54,6 @@ public class Question extends BaseEntity {
   private Boolean isAiGenerated = false;
 
   private String aiSummary;
-  private String aiHashtags; // 해시태그는 ,로 구분된 문자열로 저장
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -71,8 +70,19 @@ public class Question extends BaseEntity {
   @BatchSize(size = 100)
   private List<QuestionLike> questionLikes = new ArrayList<>();
 
-  public void updateAIAnalysis(String summary, String hashtags) {
+  @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<AiHashtag> aiHashtags = new ArrayList<>();
+
+  @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<QuestionKeyword> questionKeywords = new ArrayList<>();
+
+  public void updateAIAnalysis(String summary, List<AiHashtag> hashtags) {
     this.aiSummary = summary;
-    this.aiHashtags = hashtags;
+    this.aiHashtags.clear();
+    if (hashtags != null) {
+      this.aiHashtags.addAll(hashtags);
+    }
   }
 }

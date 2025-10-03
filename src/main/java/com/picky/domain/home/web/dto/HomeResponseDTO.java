@@ -1,5 +1,6 @@
 package com.picky.domain.home.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,5 +49,27 @@ public class HomeResponseDTO {
         private String bookTitle;
         private String bookAuthor;
         private String bookCover;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class WeeklyKeywordResponseDTO {
+
+        @Schema(description = "이번 주 키워드 정보 (1~3위)")
+        private List<KeywordInfo> keywords;
+
+        @Getter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
+        public static class KeywordInfo {
+            @Schema(description = "순위", example = "1")
+            private int rank;
+
+            @Schema(description = "키워드", example = "성장")
+            private String keyword;
+        }
     }
 }
