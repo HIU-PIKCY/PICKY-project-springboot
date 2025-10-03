@@ -5,12 +5,13 @@ import com.picky.domain.answer.service.AnswerService;
 import com.picky.domain.answer.web.dto.AnswerRequestDTO.AnswerCreateRequestDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerListResponseDTO;
-import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswersResponseDTO;
+import com.picky.domain.auth.CustomerUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,36 +29,31 @@ public class AnswerController {
 
     private final AnswerService answerService;
 
-    @Operation(summary = "사용자 답변 목록 조회 API", description = "특정 사용자가 작성한 모든 답변 목록을 조회합니다.")
-    @GetMapping("/members/{memberId}/answers")
-    public ApiResponse<MyAnswersResponseDTO> getMyAnswers(
-        @Parameter(description = "조회할 사용자 ID", example = "1")
-        @PathVariable Long memberId) {
-        return ApiResponse.onSuccess(answerService.getMyAnswers(memberId));
-    }
-
     @Operation(summary = "답변 등록 API", description = "특정 질문에 대한 답변을 등록합니다.")
-    @PostMapping("/questions/{questionId}/answers/{memberId}")
+    @PostMapping("/questions/{questionId}/answers")
     public ApiResponse<AnswerCreateResponseDTO> createAnswer(
         @PathVariable Long questionId,
-        @PathVariable Long memberId,
+        @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
         @Valid @RequestBody AnswerCreateRequestDTO request
     ) {
+        Long memberId = customerUserDetails.getMember().getId();
         return ApiResponse.onSuccess(answerService.createAnswer(questionId, memberId, request));
     }
 
     @Operation(summary = "질문별 답변 조회 API", description = "특정 질문에 대한 모든 답변을 조회합니다.")
     @GetMapping("/questions/{questionId}/answers")
-    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @Parameter(description = "정렬 기준 (latest: 최신순, oldest: 오래된 순)", required = false) @RequestParam(defaultValue = "oldest") String sort) {
-        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, sort));
+    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @AuthenticationPrincipal CustomerUserDetails customerUserDetails, @Parameter(description = "정렬 기준 (latest: 최신순, oldest: 오래된 순)", required = false) @RequestParam(defaultValue = "oldest") String sort) {
+        Long memberId = customerUserDetails.getMember().getId();
+        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, memberId, sort));
     }
 
     @Operation(summary = "답변 삭제 API", description = "특정 답변을 삭제합니다.")
-    @DeleteMapping("/answers/{answerId}/{memberId}")
+    @DeleteMapping("/answers/{answerId}")
     public ApiResponse<String> deleteAnswer(
         @PathVariable Long answerId,
-        @PathVariable Long memberId
+        @AuthenticationPrincipal CustomerUserDetails customerUserDetails
     ) {
+        Long memberId = customerUserDetails.getMember().getId();
         answerService.deleteAnswer(answerId, memberId);
         return ApiResponse.onSuccess("답변이 성공적으로 삭제되었습니다.");
     }

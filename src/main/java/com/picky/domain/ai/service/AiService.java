@@ -1,7 +1,10 @@
 package com.picky.domain.ai.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.picky.domain.question.entity.enums.Keyword;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +19,7 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -237,28 +241,28 @@ public class AiService {
                 %s
     
                 ---
-                
+                        
                 [답변 가이드라인]
                 1. 심층 분석: 먼저, 입력된 책 정보를 바탕으로 해당 도서의 핵심 논지(비문학)나 서사(문학), 저자의 의도를 내재된 지식을 활용해 분석합니다.
                 2. 질문 해석: 질문의 의도를 명확히 파악합니다.
                 3. 답변 생성: 위 분석과 해석을 종합하여, 아래 [참고 예시]를 참고하여 답변을 완성합니다.
-                    1. 책 내용을 절대로 지어내면 안됩니다. 무조건 검색해서 해당 책에 대한 내용을 기반으로 질문에 대한 답변을 생각해주세요.
-                    2. 반드시 친구에게 말하듯, 모든 문장을 '해요', '있어요', '같아요' 같은 친근하고 부드러운 '-요'체로 끝내주세요.
-                    3. 아래 [나쁜 답변 예시]처럼 딱딱한 설명조의 말투는 절대 사용하지 마세요.
+                            1. 책 내용을 절대로 지어내면 안됩니다. 무조건 검색해서 해당 책에 대한 내용을 기반으로 질문에 대한 답변을 생각해주세요.
+                            2. 반드시 친구에게 말하듯, 모든 문장을 '해요', '있어요', '같아요' 같은 친근하고 부드러운 '-요'체로 끝내주세요.
+                            3. 아래 [나쁜 답변 예시]처럼 딱딱한 설명조의 말투는 절대 사용하지 마세요.
                 4. 다음 3가지 원칙에 따라 답변해주세요.
-                    1. 당신의 최우선 임무는 책에 없는 내용을 절대로 지어내지 않는 것입니다.
-                    2. 만약 책의 구체적인 줄거리나 내용을 정확히 모른다면, 절대 추측해서 답변하면 안 됩니다.
-                    3. 모르는 내용일 경우, 질문과 책 제목을 바탕으로 "이런 주제에 대해 생각해 볼 수 있을 것 같아요" 또는 "그 질문을 보니 ~라는 점이 흥미롭네요" 와 같이 
-                       당신의 생각을 일반적인 독후감처럼 이야기하세요. 절대 책의 특정 내용인 것처럼 단정 지으면 안 됩니다.
+                            1. 당신의 최우선 임무는 책에 없는 내용을 절대로 지어내지 않는 것입니다.
+                            2. 만약 책의 구체적인 줄거리나 내용을 정확히 모른다면, 절대 추측해서 답변하면 안 됩니다.
+                            3. 모르는 내용일 경우, 질문과 책 제목을 바탕으로 "이런 주제에 대해 생각해 볼 수 있을 것 같아요" 또는 "그 질문을 보니 ~라는 점이 흥미롭네요" 와 같이\s
+                               당신의 생각을 일반적인 독후감처럼 이야기하세요. 절대 책의 특정 내용인 것처럼 단정 지으면 안 됩니다.
     
                 [나쁜 답변 예시 (설명조, '-ㅂ니다' 체)]
                 "'1984'의 빅브라더 체제는 정보 통제를 통해 사회를 조작합니다. 이는 대중의 자유를 박탈하고 진실을 왜곡함으로써 권력을 유지하는 수단입니다. 따라서 우리는 비판적 사고를 유지해야 함을 배울 수 있습니다."
-    
+                        
                 [좋은 답변 예시 (친근한 '-요'체)]
                 "빅브라더는 과거의 기록을 전부 조작해서 사람들의 생각까지 통제하려고 하잖아요. 이런 모습을 보면, 진실을 아는 것과 자유롭게 생각하는 게 얼마나 중요한지 다시 한번 느끼게 되는 것 같아요. 책을 읽으면서 미래 사회에 대한 경고처럼 느껴지기도 했어요."
-    
+                        
                 이제, 위의 가이드라인을 따라서 아래 JSON 형식에 맞춰 한국어로 답변을 작성해주세요.
-    
+                            
                 [출력 형식]
                 {
                   "content": "답변 내용"
@@ -315,4 +319,71 @@ public class AiService {
     }
     public record GeneratedAnswerDTO(String content) {}
 
+    public Mono<List<String>> getKeywords(String questionTitle, String questionContent) {
+        String prompt = createKeywordPrompt(questionTitle, questionContent);
+
+        List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
+        Map<String, Object> body = Map.of(
+            "model", "gpt-3.5-turbo",
+            "messages", messages,
+            "temperature", 0.2
+        );
+
+        return webClient.post()
+                        .uri(OPENAI_API_URL)
+                        .header("Authorization", "Bearer " + apiKey)
+                        .bodyValue(body)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .flatMap(responseBody -> {
+                            log.info("OpenAI Raw Response (Keywords): {}", responseBody);
+                            try {
+                                JsonNode root = objectMapper.readTree(responseBody);
+                                String content = root.path("choices").get(0).path("message").path("content").asText();
+
+                                int startIndex = content.indexOf('[');
+                                int endIndex = content.lastIndexOf(']');
+
+                                if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+                                    String jsonArrayString = content.substring(startIndex, endIndex + 1);
+                                    List<String> keywords = objectMapper.readValue(jsonArrayString, new TypeReference<>() {});
+                                    log.info("Successfully parsed keywords: {}", keywords);
+                                    return Mono.just(keywords);
+                                } else {
+                                    // 만약 응답에서 '[' 와 ']'를 찾지 못하면 에러를 발생
+                                    log.error("Could not find a valid JSON array in the content: {}", content);
+                                    return Mono.error(new Exception("Invalid JSON format from AI: " + content));
+                                }
+
+                            } catch (Exception e) {
+                                log.error("Failed to parse keywords response: {}", responseBody, e);
+                                return Mono.error(e);
+                            }
+                        });
+    }
+
+    private String createKeywordPrompt(String questionTitle, String questionContent) {
+        // Keyword Enum에 추가한 헬퍼 메서드 사용
+        String keywordList = Keyword.getPromptValuesAsString();
+
+        return String.format(
+            """
+            [지시]
+            다음 [질문]을 분석하고, 아래 [키워드 목록]에서 가장 관련성 높은 키워드를 정확히 3개만 선택해주세요.
+
+            [질문 제목]
+            %s
+
+            [질문 내용]
+            %s
+
+            [키워드 목록]
+            %s
+
+            [출력 형식]
+            - ["키워드1", "키워드2", "키워드3"] 형태의 JSON 배열로만 응답해주세요.
+            - 다른 설명은 절대 추가하지 마세요.
+            """, questionTitle, questionContent, keywordList
+        );
+    }
 }
