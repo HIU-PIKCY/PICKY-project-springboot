@@ -53,7 +53,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .pageNum(request.getPage())
-                .isAiGenerated(false)
+                .isAiGenerated(request.getIsAI())
                 .member(member)
                 .build();
 
