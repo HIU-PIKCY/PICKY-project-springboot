@@ -4,6 +4,7 @@ import com.picky.apiPayload.ApiResponse;
 import com.picky.domain.auth.CustomerUserDetails;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.recommendation.service.RecommendationService;
+import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO;
 import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +32,20 @@ public class RecommendationController {
         Member currentMember = customerUserDetails.getMember();
         return ApiResponse.onSuccess(
                 recommendationService.recommendBookBasedOnKeywords(currentMember.getId())
+        );
+    }
+
+    @Operation(
+            summary = "피키 유저가 선택한 책 추천 API",
+            description = "사용자들이 서재에 담은 책 중에서 내 서재에 없는 책 중 하나를 추천합니다."
+    )
+    @GetMapping("/picky-pick")
+    public ApiResponse<RecommendationResponseDTO.RecommendedBookInfo> getPickyPickRecommendation(
+            @AuthenticationPrincipal CustomerUserDetails customerUserDetails
+    ) {
+        Member currentMember = customerUserDetails.getMember();
+        return ApiResponse.onSuccess(
+                recommendationService.recommendPickyPick(currentMember.getId())
         );
     }
 }

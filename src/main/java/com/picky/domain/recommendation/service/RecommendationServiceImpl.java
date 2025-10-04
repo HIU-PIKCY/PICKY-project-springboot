@@ -2,7 +2,10 @@ package com.picky.domain.recommendation.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.web.dto.BookResponseDTO;
+import com.picky.domain.bookShelf.entity.BookShelf;
+import com.picky.domain.bookShelf.repository.BookShelfRepository;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.entity.QuestionKeyword;
 import com.picky.domain.question.entity.enums.Keyword;
@@ -29,6 +32,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final Random random = new Random();
     private final QuestionKeywordRepository questionKeywordRepository;
     private final WebClient webClient;
+    private final BookShelfRepository bookShelfRepository;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -116,6 +120,26 @@ public class RecommendationServiceImpl implements RecommendationService {
                         .build())
                 .relatedQuestionId(selectedQuestion.getId())
                 .recommendationKeyword(mostFrequentKeyword.getDisplayName())
+                .build();
+    }
+
+    public RecommendedBookInfo recommendPickyPick(Long memberId) {
+        BookShelf randomBookShelf = bookShelfRepository.findRandomBook(memberId)
+                .orElse(null);
+        if (randomBookShelf == null) {
+            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND, "추천할 수 있는 책이 없습니다.");
+        }
+
+        Book book = randomBookShelf.getBook();
+        String bookDescription = fetchBookDescription(book.getIsbn());
+
+        return RecommendedBookInfo.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .coverImage(book.getCoverImage())
+                .isbn(book.getIsbn())
+                .description(bookDescription)
                 .build();
     }
 
