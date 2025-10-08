@@ -26,11 +26,13 @@ import com.picky.global.enums.DataStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -64,7 +66,7 @@ public class BookServiceImpl implements BookService {
             default -> "Keyword";
         };
 
-        int start = request.getPage() * request.getSize() + 1; // Aladin API는 1부터 시작
+        int start = request.getPage();
         int maxResults = request.getSize();
 
         String uri = "https://www.aladin.co.kr/ttb/api/ItemSearch.aspx"
@@ -107,7 +109,17 @@ public class BookServiceImpl implements BookService {
                 .map(BookResponseDTO::getTotalResults)
                 .orElse(dtos.size());
 
-        boolean hasNext = totalCount > request.getPage() * request.getSize();
+        // 알라딘 API는 최대 200개까지만 제공
+        int actualTotalCount = Math.min(totalCount, 200);
+
+        // 현재 페이지로 실제 조회한 마지막 아이템의 위치 계산
+        // page=1, size=20 → 1~20번 → currentEnd=20
+        // page=10, size=20 → 181~200번 → currentEnd=200
+        int actualStart = (request.getPage() - 1) * request.getSize() + 1;
+        int currentEnd = actualStart + dtos.size() - 1;
+
+        // 다음 페이지 존재 여부: 현재 끝 위치가 실제 총 개수보다 작고, 응답 개수가 요청한 size와 같을 때
+        boolean hasNext = currentEnd < actualTotalCount && dtos.size() == request.getSize();
 
         BookSearchResponseDTO result = new BookSearchResponseDTO();
         result.setItems(dtos);
