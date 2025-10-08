@@ -1,6 +1,7 @@
 package com.picky.domain.answer.repository;
 
 import com.picky.domain.answer.entity.Answer;
+import com.picky.domain.question.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -28,4 +29,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long>,
         "WHERE a.question.id = :questionId " +
         "ORDER BY a.createdAt DESC")
     List<Answer> findByQuestionIdWithMember(@Param("questionId") Long questionId);
+
+    int countByQuestion(Question question);
 }

@@ -41,7 +41,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // 답변
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "ANSWER_404", "해당 답변을 찾을 수 없습니다."),
     INVALID_PARENT_ANSWER(HttpStatus.BAD_REQUEST, "ANSWER_400", "부모 답변이 유효하지 않습니다."),
-    NOT_ANSWER_AUTHOR(HttpStatus.FORBIDDEN, "ANSWER_403", "답변 작성자만 삭제할 수 있습니다.");
+    NOT_ANSWER_AUTHOR(HttpStatus.FORBIDDEN, "ANSWER_403", "답변 작성자만 삭제할 수 있습니다."),
+
+    // 알림
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_404", "해당 알림을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

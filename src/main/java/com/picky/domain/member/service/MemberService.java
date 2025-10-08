@@ -29,4 +29,12 @@ public interface MemberService {
     void validateNickname(String nickname);
 
     boolean isNicknameAvailable(String nickname);
+
+    /**
+     * FCM 토큰을 업데이트합니다.
+     *
+     * @param memberId 업데이트할 member의 id
+     * @param fcmToken 새로운 FCM 토큰
+     */
+    void updateFcmToken(Long memberId, String fcmToken);
 }

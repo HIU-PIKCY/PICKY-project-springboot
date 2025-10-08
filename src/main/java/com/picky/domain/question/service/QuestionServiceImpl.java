@@ -4,10 +4,15 @@ import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.ai.service.AiService;
 import com.picky.domain.ai.service.QuestionAiUpdateService;
+import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
+import com.picky.domain.notification.entity.Notification;
+import com.picky.domain.notification.entity.enums.NotificationType;
+import com.picky.domain.notification.repository.NotificationRepository;
+import com.picky.domain.notification.service.NotificationService;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionRequestDTO.QuestionPostRequestDTO;
@@ -19,6 +24,7 @@ import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionInfoRespons
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionListResponseDTO;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
 import com.picky.domain.questionLike.repository.QuestionLikeRepository;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +43,9 @@ public class QuestionServiceImpl implements QuestionService {
     private final MemberRepository memberRepository;
     private final QuestionLikeRepository questionLikeRepository;
     private final QuestionAiUpdateService questionAiUpdateService;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+    private final AnswerRepository answerRepository;
 
     @Override
     @Transactional
@@ -135,14 +144,36 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional // 조회수 증가 메서드 때문에 붙임
     public QuestionDetailResponseDTO getQuestionDetail(Long questionId, Long memberId) {
 
-        // 조회수 증가
-        int updatedViews = questionRepository.increaseViews(questionId);
-        if (updatedViews == 0) {
-            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND);
-        }
-
         Question question = questionRepository.findByIdWithBookAndMember(questionId)
                                               .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
+
+        // 조회수 15 달성 알림 로직
+        // 현재 조회수가 14일 때만 실행 (이번 조회로 15가 되므로)
+        if (question.getViews() == 14) {
+            Member questionAuthor = question.getMember();
+
+            // 본인이 본인 글을 봐서 15가 되는 경우는 알림 X
+            if (!questionAuthor.getId().equals(memberId)) {
+                String title = "Picky";
+                String body = "회원님이 작성한 게시글이 주목받고 있어요!";
+                Map<String, String> data = new HashMap<>();
+                data.put("type", "VIEW_COUNT_ACHIEVED");
+                data.put("questionId", String.valueOf(questionId));
+                notificationService.sendNotification(title, body, null, questionAuthor, data);
+
+                // DB에 알림 저장
+                Notification notification = Notification.builder()
+                                                        .member(questionAuthor)
+                                                        .content(body)
+                                                        .notificationType(NotificationType.VIEW_COUNT)
+                                                        .questionId(questionId)
+                                                        .build();
+                notificationRepository.save(notification);
+            }
+        }
+
+        // 조회수 증가
+        questionRepository.increaseViews(questionId);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -153,17 +184,20 @@ public class QuestionServiceImpl implements QuestionService {
         Boolean isLiked = questionLikeRepository.existsByMemberAndQuestion(member, question);
         boolean isAuthor = author.getId().equals(memberId);
 
+        int likeCounts = questionLikeRepository.countByQuestion(question);
+        int answerCounts = answerRepository.countByQuestion(question);
+
         return QuestionDetailResponseDTO.builder()
                 .id(question.getId())
-                .profileImg(question.getMember().getProfileImg())
+                .profileImg(author.getProfileImg())
                 .title(question.getTitle())
                 .content(question.getContent())
                 .authorId(author.getId())
-                .author(question.getMember().getNickname())
+                .author(author.getNickname())
                 .isAI(question.getIsAiGenerated())
-                .views(question.getViews())
-                .likes(question.getQuestionLikes().size())
-                .answersCount(question.getAnswers().size())
+                .views(question.getViews() + 1)
+                .likes(likeCounts)
+                .answersCount(answerCounts)
                 .page(question.getPageNum())
                 .createdAt(question.getCreatedAt())
                 .book(QuestionResponseDTO.BookInfoResponseDTO.builder()

@@ -64,4 +64,11 @@ public class Member extends BaseEntity {
   private List<QuestionLike> questionLikes = new ArrayList<>();
 
   private String profileImg;
+
+  @Column(unique = true)
+  private String fcmToken;
+
+  public void updateFcmToken(String fcmToken) {
+    this.fcmToken = fcmToken;
+  }
 }
