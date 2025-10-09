@@ -165,32 +165,31 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public AnswerListResponseDTO getAnswersByQuestion(Long questionId, Long memberId, String sort) {
+    public AnswerListResponseDTO getAnswersByQuestion(Long questionId, Long memberId) {
 
         questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
         List<Answer> answers = answerRepository.findByQuestionIdWithMember(questionId);
 
+        Comparator<Answer> byCreatedAsc = Comparator.comparing(Answer::getCreatedAt);
+
         Map<Long, List<AnswerInfoResponseDTO>> childrenMap = answers.stream()
             .filter(a -> a.getParentAnswer() != null) // 이건 전부 대댓글
+            .sorted(byCreatedAsc)
             .collect(Collectors.groupingBy(
                 a -> a.getParentAnswer().getId(), // 부모 댓글 id 기준으로 묶기
                 Collectors.mapping(a -> convertToAnswerInfoDTO(a, memberId), Collectors.toList())
             ));
 
         // 부모 댓글만 필터링
-        Stream<Answer> parentStream = answers.stream()
-                                             .filter(a -> a.getParentAnswer() == null);
-
-        if ("latest".equalsIgnoreCase(sort)) {
-            parentStream = parentStream.sorted(Comparator.comparing(Answer::getCreatedAt).reversed());
-        } else if ("oldest".equalsIgnoreCase(sort)) {
-            parentStream = parentStream.sorted(Comparator.comparing(Answer::getCreatedAt));
-        }
+        List<Answer> parents = answers.stream()
+                                      .filter(a -> a.getParentAnswer() == null)
+                                      .sorted(byCreatedAsc)
+                                      .toList();
 
         // DTO 변환
-        List<AnswerInfoResponseDTO> responseDTOs = parentStream
+        List<AnswerInfoResponseDTO> responseDTOs = parents.stream()
             .map(parent -> {boolean isAuthor = parent.getMember().getId().equals(memberId);
                 return AnswerInfoResponseDTO.builder()
                                                 .id(parent.getId())
