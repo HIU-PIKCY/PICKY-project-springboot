@@ -104,10 +104,21 @@ public class RecommendationServiceImpl implements RecommendationService {
         //log.info("[추천 완료] 선택된 질문 ID: {}, 책: '{}'",
         //        selectedQuestion.getId(),selectedQuestion.getBook().getTitle());
 
-        // 4. 알라딘 API에서 책 설명 가져오기
+        // 4. 해당 키워드를 사용한 내 질문 중 랜덤 선택
+        List<Question> myQuestionsWithKeyword = userKeywords.stream()
+                .filter(qk -> qk.getKeyword().equals(mostFrequentKeyword))
+                .map(QuestionKeyword::getQuestion)
+                .distinct()
+                .toList();
+
+        Question mySelectedQuestion = myQuestionsWithKeyword.get(
+                random.nextInt(myQuestionsWithKeyword.size())
+        );
+
+        // 5. 알라딘 API에서 책 설명 가져오기
         String bookDescription = fetchBookDescription(selectedQuestion.getBook().getIsbn());
 
-        // 4. DTO 생성 및 반환
+        // 6. DTO 생성 및 반환
         return BookRecommendationDTO.builder()
                 .book(RecommendedBookInfo.builder()
                         .id(selectedQuestion.getBook().getId())
@@ -117,8 +128,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                         .isbn(selectedQuestion.getBook().getIsbn())
                         .description(bookDescription)
                         .build())
-                .relatedQuestionId(selectedQuestion.getId())
-                .relatedQuestionTitle(selectedQuestion.getTitle())
+                .relatedQuestionId(mySelectedQuestion.getId())
+                .relatedQuestionTitle(mySelectedQuestion.getTitle())
                 .build();
     }
 
