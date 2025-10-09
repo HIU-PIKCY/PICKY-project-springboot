@@ -31,7 +31,7 @@ public interface AnswerService {
      * @param questionId 조회할 질문 ID
      * @return 해당 질문에 대한 답변 목록 DTO
      */
-    AnswerListResponseDTO getAnswersByQuestion(Long questionId, Long memberId, String sort);
+    AnswerListResponseDTO getAnswersByQuestion(Long questionId, Long memberId);
 
     /**
      * 특정 답변을 삭제합니다.

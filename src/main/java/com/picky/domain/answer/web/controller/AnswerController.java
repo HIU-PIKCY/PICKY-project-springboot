@@ -42,9 +42,9 @@ public class AnswerController {
 
     @Operation(summary = "질문별 답변 조회 API", description = "특정 질문에 대한 모든 답변을 조회합니다.")
     @GetMapping("/questions/{questionId}/answers")
-    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @AuthenticationPrincipal CustomerUserDetails customerUserDetails, @Parameter(description = "정렬 기준 (latest: 최신순, oldest: 오래된 순)", required = false) @RequestParam(defaultValue = "oldest") String sort) {
+    public ApiResponse<AnswerListResponseDTO> getAnswersByQuestion(@PathVariable Long questionId, @AuthenticationPrincipal CustomerUserDetails customerUserDetails) {
         Long memberId = customerUserDetails.getMember().getId();
-        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, memberId, sort));
+        return ApiResponse.onSuccess(answerService.getAnswersByQuestion(questionId, memberId));
     }
 
     @Operation(summary = "답변 삭제 API", description = "특정 답변을 삭제합니다.")
