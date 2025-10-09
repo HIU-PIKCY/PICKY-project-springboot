@@ -45,14 +45,14 @@ public class RecommendationServiceImpl implements RecommendationService {
      * 3. 선택된 질문과 연결된 책을 추천합니다.
      */
     public BookRecommendationDTO recommendBookBasedOnKeywords(Long memberId) {
-        log.info("[추천 시작] 사용자 ID: {}", memberId);
+    //    log.info("[추천 시작] 사용자 ID: {}", memberId);
 
         // 1. 해당 사용자의 가장 많이 사용된 키워드 찾기
         List<QuestionKeyword> userKeywords = questionKeywordRepository
                 .findByQuestionMemberId(memberId);
 
         if (userKeywords.isEmpty()) {
-            log.warn("[추천 실패] 사용자 ID: {} - 작성한 질문이 없습니다.", memberId);
+        //    log.warn("[추천 실패] 사용자 ID: {} - 작성한 질문이 없습니다.", memberId);
             throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
                     "추천을 위한 질문 데이터가 부족합니다. 질문을 작성해주세요.");
         }
@@ -72,16 +72,16 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         Long keywordCount = keywordCountMap.get(mostFrequentKeyword);
 
-        log.info("[키워드 분석] 가장 많이 사용된 키워드: '{}' ({}회 사용)",
-                mostFrequentKeyword.getDisplayName(), keywordCount);
+        //log.info("[키워드 분석] 가장 많이 사용된 키워드: '{}' ({}회 사용)",
+        //        mostFrequentKeyword.getDisplayName(), keywordCount);
 
         // 2. 해당 키워드를 사용한 다른 사용자들의 질문 찾기
         List<QuestionKeyword> relatedKeywords = questionKeywordRepository
                 .findByKeywordAndQuestionMemberIdNot(mostFrequentKeyword, memberId);
 
         if (relatedKeywords.isEmpty()) {
-            log.warn("[추천 실패] 키워드: '{}' - 다른 사용자의 관련 질문이 없습니다.",
-                    mostFrequentKeyword.getDisplayName());
+        //    log.warn("[추천 실패] 키워드: '{}' - 다른 사용자의 관련 질문이 없습니다.",
+        //            mostFrequentKeyword.getDisplayName());
             throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
                     "해당 키워드로 추천할 수 있는 책이 없습니다.");
         }
@@ -91,24 +91,34 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(QuestionKeyword::getQuestion)
                 .filter(q -> q.getBook() != null) // 책이 있는 질문만
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        log.info("[질문 검색] 키워드 '{}' 관련 질문 {}개 발견",
-                mostFrequentKeyword.getDisplayName(), relatedQuestions.size());
+        //log.info("[질문 검색] 키워드 '{}' 관련 질문 {}개 발견",
+        //        mostFrequentKeyword.getDisplayName(), relatedQuestions.size());
 
         // 3. 랜덤으로 하나의 질문 선택
         Question selectedQuestion = relatedQuestions.get(
                 random.nextInt(relatedQuestions.size())
         );
 
-        log.info("[추천 완료] 선택된 질문 ID: {}, 책: '{}'",
-                selectedQuestion.getId(),
-                selectedQuestion.getBook().getTitle());
+        //log.info("[추천 완료] 선택된 질문 ID: {}, 책: '{}'",
+        //        selectedQuestion.getId(),selectedQuestion.getBook().getTitle());
 
-        // 4. 알라딘 API에서 책 설명 가져오기
+        // 4. 해당 키워드를 사용한 내 질문 중 랜덤 선택
+        List<Question> myQuestionsWithKeyword = userKeywords.stream()
+                .filter(qk -> qk.getKeyword().equals(mostFrequentKeyword))
+                .map(QuestionKeyword::getQuestion)
+                .distinct()
+                .toList();
+
+        Question mySelectedQuestion = myQuestionsWithKeyword.get(
+                random.nextInt(myQuestionsWithKeyword.size())
+        );
+
+        // 5. 알라딘 API에서 책 설명 가져오기
         String bookDescription = fetchBookDescription(selectedQuestion.getBook().getIsbn());
 
-        // 4. DTO 생성 및 반환
+        // 6. DTO 생성 및 반환
         return BookRecommendationDTO.builder()
                 .book(RecommendedBookInfo.builder()
                         .id(selectedQuestion.getBook().getId())
@@ -118,8 +128,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                         .isbn(selectedQuestion.getBook().getIsbn())
                         .description(bookDescription)
                         .build())
-                .relatedQuestionId(selectedQuestion.getId())
-                .recommendationKeyword(mostFrequentKeyword.getDisplayName())
+                .relatedQuestionId(mySelectedQuestion.getId())
+                .relatedQuestionTitle(mySelectedQuestion.getTitle())
                 .build();
     }
 
@@ -163,16 +173,16 @@ public class RecommendationServiceImpl implements RecommendationService {
 
                 // description이 있으면 반환, 없으면 null
                 if (description != null && !description.isEmpty()) {
-                    log.info("[알라딘 API] ISBN: {} - 책 설명 조회 성공", isbn);
+                //    log.info("[알라딘 API] ISBN: {} - 책 설명 조회 성공", isbn);
                     return description;
                 }
             }
 
-            log.warn("[알라딘 API] ISBN: {} - 책 설명을 찾을 수 없습니다.", isbn);
+        //    log.warn("[알라딘 API] ISBN: {} - 책 설명을 찾을 수 없습니다.", isbn);
             return null;
 
         } catch (Exception e) {
-            log.error("[알라딘 API 오류] ISBN: {}, 에러: {}", isbn, e.getMessage());
+        //    log.error("[알라딘 API 오류] ISBN: {}, 에러: {}", isbn, e.getMessage());
             return null;
         }
     }
