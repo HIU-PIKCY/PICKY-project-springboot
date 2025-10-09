@@ -163,7 +163,8 @@ public class QuestionServiceImpl implements QuestionService {
 
                 // DB에 알림 저장
                 Notification notification = Notification.builder()
-                                                        .member(questionAuthor)
+                                                        .receiver(questionAuthor)
+                                                        .sender(null)
                                                         .content(body)
                                                         .notificationType(NotificationType.VIEW_COUNT)
                                                         .questionId(questionId)

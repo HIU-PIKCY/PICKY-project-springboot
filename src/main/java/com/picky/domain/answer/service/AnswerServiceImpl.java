@@ -114,7 +114,8 @@ public class AnswerServiceImpl implements AnswerService {
 
                 // DB에 알림 저장
                 Notification notification = Notification.builder()
-                                                        .member(parentAnswerAuthor)
+                                                        .receiver(parentAnswerAuthor) // 받는 사람
+                                                        .sender(answerer) // 보낸 사람
                                                         .content(body)
                                                         .notificationType(NotificationType.NEW_REPLY)
                                                         .questionId(questionId)
@@ -134,7 +135,8 @@ public class AnswerServiceImpl implements AnswerService {
 
                 // DB에 알림 저장
                 Notification notification = Notification.builder()
-                                                        .member(questionAuthor)
+                                                        .receiver(questionAuthor)
+                                                        .sender(answerer)
                                                         .content(body)
                                                         .notificationType(NotificationType.NEW_ANSWER)
                                                         .questionId(questionId)

@@ -23,6 +23,8 @@ public class NotificationResponseDTO {
     @Schema(description = "알림 클릭 시 이동할 대상 ID (예: questionId)")
     private Long questionId; // 알림과 관련된 대상 ID (예: 질문 ID)
 
+    private String profileImg; // 알림을 보낸 사람의 프로필 이미지 URL
+
     @Schema(description = "대댓글 알림의 경우, 부모 댓글의 ID")
     private Long parentId;
 

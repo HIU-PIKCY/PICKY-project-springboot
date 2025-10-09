@@ -61,26 +61,31 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<NotificationResponseDTO> getNotifications(Long memberId) {
+    public List<NotificationResponseDTO> getNotifications(Long receiverId) {
 
-        List<Notification> notifications = notificationRepository.findByMemberIdOrderByCreatedAtDesc(memberId);
+        List<Notification> notifications = notificationRepository.findByReceiverIdOrderByCreatedAtDesc(receiverId);
 
         return notifications.stream()
-                            .map(notification -> NotificationResponseDTO.builder()
-                                                                        .id(notification.getId())
-                                                                        .content(notification.getContent())
-                                                                        .notificationType(notification.getNotificationType())
-                                                                        .questionId(notification.getQuestionId())
-                                                                        .parentId(notification.getParentId())
-                                                                        .isRead(notification.getIsRead())
-                                                                        .createdAt(notification.getCreatedAt())
-                                                                        .build())
+                            .map(notification -> {
+                                String profileImg = (notification.getSender() != null) ? notification.getSender().getProfileImg() : null;
+
+                                return NotificationResponseDTO.builder()
+                                                              .id(notification.getId())
+                                                              .content(notification.getContent())
+                                                              .notificationType(notification.getNotificationType())
+                                                              .questionId(notification.getQuestionId())
+                                                              .parentId(notification.getParentId())
+                                                              .profileImg(profileImg)
+                                                              .isRead(notification.getIsRead())
+                                                              .createdAt(notification.getCreatedAt())
+                                                              .build();
+                            })
                             .collect(Collectors.toList());
     }
 
     @Transactional
-    public void readNotification(Long notificationId, Long memberId) {
-        Notification notification = notificationRepository.findByIdAndMemberId(notificationId, memberId)
+    public void readNotification(Long notificationId, Long receiverId) {
+        Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, receiverId)
                                                         .orElseThrow(() -> new GeneralException(ErrorStatus.NOTIFICATION_NOT_FOUND));
 
         notification.read();

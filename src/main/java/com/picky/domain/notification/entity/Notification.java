@@ -24,8 +24,12 @@ import lombok.NoArgsConstructor;
 public class Notification extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", foreignKey = @ForeignKey(name = "fk_notification_member"))
-    private Member member; // 알림을 받은 사용자
+    @JoinColumn(name = "receiver_id", foreignKey = @ForeignKey(name = "fk_notification_member"))
+    private Member receiver; // 알림을 받은 사용자
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", foreignKey = @ForeignKey(name = "fk_notification_sender"))
+    private Member sender; // 알림을 보낸 사용자 (예: 답변 작성자, 댓글 작성자)
 
     @Column(nullable = false)
     private String content; // 알림 내용

@@ -78,7 +78,8 @@ public class QuestionLikeServiceImpl implements QuestionLikeService{
 
                 // DB에 알림 저장
                 Notification notification = Notification.builder()
-                                                        .member(questionAuthor)
+                                                        .receiver(questionAuthor)
+                                                        .sender(liker)
                                                         .content(body)
                                                         .notificationType(NotificationType.QUESTION_LIKE)
                                                         .questionId(questionId)
