@@ -12,7 +12,7 @@ import java.util.Optional;
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.ai.web.dto.AiRequestDTO.AiQuestionRequestDTO;
-import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AiAnswerCreateResponseDTO;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
@@ -271,7 +271,7 @@ public class AiService {
         );
     }
 
-    public Mono<AnswerCreateResponseDTO> generateAnswer(Long questionId, Member member) {
+    public Mono<AiAnswerCreateResponseDTO> generateAnswer(Long questionId, Member member) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
@@ -306,10 +306,9 @@ public class AiService {
                         JsonNode inner = objectMapper.readTree(content);
                         String answerContent = inner.path("content").asText();
 
-                        return Mono.just(AnswerCreateResponseDTO.builder()
+                        return Mono.just(AiAnswerCreateResponseDTO.builder()
                                 .content(answerContent)
-                                .author(answerContent)
-                                .isAI(true)
+                                .author(member.getNickname())
                                 .build());
                     } catch (Exception e) {
                         log.error("Failed to parse generated answer response: {}", responseBody, e);

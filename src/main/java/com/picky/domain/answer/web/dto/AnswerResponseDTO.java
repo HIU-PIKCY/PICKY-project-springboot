@@ -57,6 +57,18 @@ public class AnswerResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class AiAnswerCreateResponseDTO {
+
+        @Schema(description = "답변 내용")
+        private String content;
+        @Schema(description = "작성자 닉네임")
+        private String author;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class AnswerListResponseDTO { // 질문별 답변 목록 조회 응답
         private List<AnswerInfoResponseDTO> answers; // 답변 목록
     }

@@ -19,7 +19,7 @@ public class RecommendationResponseDTO {
     @Schema(description = "키워드 기반 책 추천 응답")
     public static class BookRecommendationDTO {
 
-        @Schema(description = "추천된 책 정보")
+        @Schema(description = "추천 책 정보")
         private RecommendedBookInfo book;
 
         @Schema(description = "관련 질문 ID")
@@ -27,6 +27,23 @@ public class RecommendationResponseDTO {
 
         @Schema(description = "관련 질문 제목")
         private String relatedQuestionTitle;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "키워드 기반 책 추천 응답")
+    public static class BookRecommendationAnswerDTO {
+
+        @Schema(description = "추천 책 정보")
+        private RecommendedBookInfo book;
+
+        @Schema(description = "관련 답변 ID")
+        private Long relatedAnswerId;
+
+        @Schema(description = "관련 답변 책")
+        private String relatedAnswerBookTitle;
     }
 
     @Getter

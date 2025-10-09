@@ -58,4 +58,7 @@ public interface QuestionKeywordRepository extends JpaRepository<QuestionKeyword
             "WHERE qk.keyword = :keyword " +
             "AND q.book IS NOT NULL")
     List<QuestionKeyword> findByKeyword(@Param("keyword") Keyword keyword);
+
+    List<QuestionKeyword> findByQuestionId(Long questionId);
+    List<QuestionKeyword> findByKeywordInAndQuestionIdNot(List<Keyword> keywords, Long questionId);
 }

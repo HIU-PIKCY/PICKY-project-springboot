@@ -33,6 +33,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 질문
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "QUESTION_404", "해당 질문을 찾을 수 없습니다."),
     NOT_QUESTION_AUTHOR(HttpStatus.FORBIDDEN, "QUESTION_403", "질문 작성자만 삭제할 수 있습니다."),
+    QUESTION_BAD_REQUEST(HttpStatus.BAD_REQUEST, "QUESTION_400", "추천을 위한 질문 데이터가 부족합니다."),
 
     // 질문 좋아요
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "QUESTION_LIKE_401", "이미 좋아요를 눌렀습니다."),
@@ -42,9 +43,13 @@ public enum ErrorStatus implements BaseErrorCode {
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "ANSWER_404", "해당 답변을 찾을 수 없습니다."),
     INVALID_PARENT_ANSWER(HttpStatus.BAD_REQUEST, "ANSWER_400", "부모 답변이 유효하지 않습니다."),
     NOT_ANSWER_AUTHOR(HttpStatus.FORBIDDEN, "ANSWER_403", "답변 작성자만 삭제할 수 있습니다."),
+    ANSWER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "ANSWER_400", "추천을 위한 답변 데이터가 부족합니다."),
 
     // 알림
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_404", "해당 알림을 찾을 수 없습니다.");
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_404", "해당 알림을 찾을 수 없습니다."),
+
+    //키워드
+    KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_404", "해당 키워드를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

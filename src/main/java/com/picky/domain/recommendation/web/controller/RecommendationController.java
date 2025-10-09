@@ -6,6 +6,7 @@ import com.picky.domain.member.entity.Member;
 import com.picky.domain.recommendation.service.RecommendationService;
 import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO;
 import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationDTO;
+import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationAnswerDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,20 @@ public class RecommendationController {
         Member currentMember = customerUserDetails.getMember();
         return ApiResponse.onSuccess(
                 recommendationService.recommendBookBasedOnKeywords(currentMember.getId())
+        );
+    }
+
+    @Operation(
+            summary = "답변 기반 책 추천 API",
+            description = "사용자 답변의 질문을 분석하여 같은 키워드를 사용한 다른 사용자들의 질문에 기반해 책을 추천합니다."
+    )
+    @GetMapping("/answer-based")
+    public ApiResponse<BookRecommendationAnswerDTO> getPersonalizedRecommendationAnswer(
+            @AuthenticationPrincipal CustomerUserDetails customerUserDetails
+    ) {
+        Member currentMember = customerUserDetails.getMember();
+        return ApiResponse.onSuccess(
+                recommendationService.recommendBookBasedOnAnswers(currentMember.getId())
         );
     }
 
