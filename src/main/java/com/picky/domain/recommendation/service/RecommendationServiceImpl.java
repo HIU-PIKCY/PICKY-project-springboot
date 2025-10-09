@@ -57,8 +57,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         if (userKeywords.isEmpty()) {
         //    log.warn("[추천 실패] 사용자 ID: {} - 작성한 질문이 없습니다.", memberId);
-            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
-                    "추천을 위한 질문 데이터가 부족합니다. 질문을 작성해주세요.");
+            throw new GeneralException(ErrorStatus.QUESTION_BAD_REQUEST);
         }
 
         // 키워드 빈도수 계산
@@ -204,8 +203,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<Answer> myAnswers = answerRepository.findByMemberId(memberId);
 
         if (myAnswers.isEmpty()) {
-            throw new GeneralException(ErrorStatus.ANSWER_NOT_FOUND,
-                    "추천을 위한 답변 데이터가 부족합니다. 답변을 작성해주세요.");
+            throw new GeneralException(ErrorStatus.ANSWER_BAD_REQUEST);
         }
 
         // 2. 질문이 연결된 답변만 필터링
