@@ -2,6 +2,8 @@ package com.picky.domain.recommendation.service;
 
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
+import com.picky.domain.answer.entity.Answer;
+import com.picky.domain.answer.repository.AnswerRepository;
 import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.web.dto.BookResponseDTO;
 import com.picky.domain.bookShelf.entity.BookShelf;
@@ -10,6 +12,7 @@ import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.entity.QuestionKeyword;
 import com.picky.domain.question.entity.enums.Keyword;
 import com.picky.domain.question.repository.QuestionKeywordRepository;
+import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationAnswerDTO;
 import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.BookRecommendationDTO;
 import com.picky.domain.recommendation.web.dto.RecommendationResponseDTO.RecommendedBookInfo;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final QuestionKeywordRepository questionKeywordRepository;
     private final WebClient webClient;
     private final BookShelfRepository bookShelfRepository;
+    private final AnswerRepository answerRepository;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -185,5 +189,100 @@ public class RecommendationServiceImpl implements RecommendationService {
         //    log.error("[알라딘 API 오류] ISBN: {}, 에러: {}", isbn, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * 사용자의 답변을 기반으로 책을 추천합니다.
+     * 추천 로직:
+     * 1. 해당 사용자가 작성한 답변 중 하나를 랜덤으로 선택합니다.
+     * 2. 선택된 답변이 연결된 질문의 키워드들을 가져옵니다.
+     * 3. 그 키워드들을 사용한 다른 사용자의 질문을 찾습니다.
+     * 4. 찾은 질문에 연결된 책을 추천합니다.
+     */
+    public BookRecommendationAnswerDTO recommendBookBasedOnAnswers(Long memberId) {
+        // 1. 해당 사용자가 작성한 답변 찾기
+        List<Answer> myAnswers = answerRepository.findByMemberId(memberId);
+
+        if (myAnswers.isEmpty()) {
+            throw new GeneralException(ErrorStatus.ANSWER_NOT_FOUND,
+                    "추천을 위한 답변 데이터가 부족합니다. 답변을 작성해주세요.");
+        }
+
+        // 2. 질문이 연결된 답변만 필터링
+        List<Answer> answersWithQuestion = myAnswers.stream()
+                .filter(answer -> answer.getQuestion() != null)
+                .toList();
+
+        if (answersWithQuestion.isEmpty()) {
+            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
+                    "답변한 질문이 없습니다.");
+        }
+
+        // 3. 랜덤으로 하나의 답변 선택
+        Answer selectedAnswer = answersWithQuestion.get(
+                random.nextInt(answersWithQuestion.size())
+        );
+
+        // 4. 선택된 답변의 질문 가져오기
+        Question myAnsweredQuestion = selectedAnswer.getQuestion();
+
+        // 5. 그 질문의 키워드들 가져오기
+        List<QuestionKeyword> questionKeywords = questionKeywordRepository
+                .findByQuestionId(myAnsweredQuestion.getId());
+
+        if (questionKeywords.isEmpty()) {
+            throw new GeneralException(ErrorStatus.KEYWORD_NOT_FOUND,
+                    "해당 질문에 키워드가 없습니다.");
+        }
+
+        // 6. 키워드들을 추출
+        List<Keyword> keywords = questionKeywords.stream()
+                .map(QuestionKeyword::getKeyword)
+                .toList();
+
+        // 7. 그 키워드들을 사용한 다른 사용자의 질문 찾기 (내 답변에 연결된 질문 제외)
+        List<QuestionKeyword> relatedKeywords = questionKeywordRepository
+                .findByKeywordInAndQuestionIdNot(keywords, myAnsweredQuestion.getId());
+
+        if (relatedKeywords.isEmpty()) {
+            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
+                    "해당 키워드로 추천할 수 있는 책이 없습니다.");
+        }
+
+        // 8. 질문 리스트 추출 (책이 있고, 중복 제거)
+        List<Question> relatedQuestions = relatedKeywords.stream()
+                .map(QuestionKeyword::getQuestion)
+                .filter(q -> q.getBook() != null) // 책이 있는 질문만
+                .distinct()
+                .toList();
+
+        if (relatedQuestions.isEmpty()) {
+            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND,
+                    "해당 키워드를 사용한 질문 중 책이 연결된 질문이 없습니다.");
+        }
+
+        // 9. 랜덤으로 하나의 질문 선택
+        Question selectedQuestion = relatedQuestions.get(
+                random.nextInt(relatedQuestions.size())
+        );
+
+        Book recommendedBook = selectedQuestion.getBook();
+
+        // 10. 알라딘 API에서 책 설명 가져오기
+        String bookDescription = fetchBookDescription(recommendedBook.getIsbn());
+
+        // 11. DTO 생성 및 반환
+        return BookRecommendationAnswerDTO.builder()
+                .book(RecommendedBookInfo.builder()
+                        .id(recommendedBook.getId())
+                        .title(recommendedBook.getTitle())
+                        .author(recommendedBook.getAuthor())
+                        .coverImage(recommendedBook.getCoverImage())
+                        .isbn(recommendedBook.getIsbn())
+                        .description(bookDescription)
+                        .build())
+                .relatedAnswerId(selectedAnswer.getId())
+                .relatedAnswerBookTitle(myAnsweredQuestion.getBook().getTitle())
+                .build();
     }
 }

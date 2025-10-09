@@ -1,7 +1,7 @@
 package com.picky.domain.ai.web.controller;
 
 import com.picky.domain.ai.service.AiService;
-import com.picky.domain.answer.web.dto.AnswerResponseDTO.AnswerCreateResponseDTO;
+import com.picky.domain.answer.web.dto.AnswerResponseDTO.AiAnswerCreateResponseDTO;
 import com.picky.domain.auth.CustomerUserDetails;
 import com.picky.domain.ai.web.dto.AiRequestDTO.AiQuestionRequestDTO;
 import com.picky.domain.member.entity.Member;
@@ -36,7 +36,7 @@ public class AiController {
 
     @Operation(summary = "AI 답변 생성 API", description = "질문에 기반한 답변을 생성합니다.")
     @PostMapping("/generate-answer/{questionId}")
-    public Mono<ResponseEntity<AnswerCreateResponseDTO>> generateAnswer(
+    public Mono<ResponseEntity<AiAnswerCreateResponseDTO>> generateAnswer(
             @AuthenticationPrincipal CustomerUserDetails customerUserDetails,
             @PathVariable Long questionId
     ) {

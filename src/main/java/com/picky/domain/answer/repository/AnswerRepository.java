@@ -31,4 +31,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Long>,
     List<Answer> findByQuestionIdWithMember(@Param("questionId") Long questionId);
 
     int countByQuestion(Question question);
+
+    List<Answer> findByMemberId(Long memberId);
 }
