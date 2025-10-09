@@ -4,6 +4,10 @@ import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
+import com.picky.domain.notification.entity.Notification;
+import com.picky.domain.notification.entity.enums.NotificationType;
+import com.picky.domain.notification.repository.NotificationRepository;
+import com.picky.domain.notification.service.NotificationService;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.questionLike.entity.QuestionLike;
@@ -12,6 +16,7 @@ import com.picky.domain.questionLike.web.dto.QuestionLikeResponseDTO.QuestionLik
 import com.picky.domain.questionLike.web.dto.QuestionLikeResponseDTO.MyLikesResponseDTO;
 import com.picky.domain.questionLike.web.dto.QuestionLikeResponseDTO.LikeItemDTO;
 import com.picky.global.util.TimeUtils;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +33,8 @@ public class QuestionLikeServiceImpl implements QuestionLikeService{
     private final QuestionRepository questionRepository;
     private final MemberRepository memberRepository;
     private final QuestionLikeRepository questionLikeRepository;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public QuestionLikeStatusResponseDTO likeQuestion(Long questionId, Long memberId) {
@@ -35,11 +42,11 @@ public class QuestionLikeServiceImpl implements QuestionLikeService{
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.QUESTION_NOT_FOUND));
 
-        Member member = memberRepository.findById(memberId)
+        Member liker = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
 
-        Optional<QuestionLike> existingLike = questionLikeRepository.findByMemberAndQuestion(member, question);
+        Optional<QuestionLike> existingLike = questionLikeRepository.findByMemberAndQuestion(liker, question);
 
         if(existingLike.isPresent()) {
             // 이미 좋아요 했으면 취소 처리
@@ -55,9 +62,29 @@ public class QuestionLikeServiceImpl implements QuestionLikeService{
             // 좋아요 안했으면 추가 처리
             QuestionLike questionLike = QuestionLike.builder()
                     .question(question)
-                    .member(member)
+                    .member(liker)
                     .build();
             questionLikeRepository.save(questionLike);
+
+            // 알림
+            Member questionAuthor = question.getMember();
+            if (!questionAuthor.getId().equals(liker.getId())) { // 본인 글에 좋아요 누르는건 알림 X
+                String title = "Picky";
+                String body = liker.getNickname() + "님이 회원님의 질문에 좋아요를 눌렀습니다.";
+                Map<String, String> data = new HashMap<>();
+                data.put("type", "QUESTION_LIKE");
+                data.put("questionId", String.valueOf(questionId));
+                notificationService.sendNotification(title, body, liker.getProfileImg(), questionAuthor, data);
+
+                // DB에 알림 저장
+                Notification notification = Notification.builder()
+                                                        .member(questionAuthor)
+                                                        .content(body)
+                                                        .notificationType(NotificationType.QUESTION_LIKE)
+                                                        .questionId(questionId)
+                                                        .build();
+                notificationRepository.save(notification);
+            }
 
             int likeCounts = questionLikeRepository.countByQuestion(question);
 

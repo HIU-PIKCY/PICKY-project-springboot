@@ -86,4 +86,13 @@ public class MemberServiceImpl implements MemberService {
                 .stats(memberStatusDTO)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void updateFcmToken(Long memberId, String fcmToken) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        member.updateFcmToken(fcmToken);
+    }
 }

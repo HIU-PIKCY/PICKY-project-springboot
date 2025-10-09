@@ -12,10 +12,15 @@ import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswerDTO;
 import com.picky.domain.answer.web.dto.AnswerResponseDTO.MyAnswersResponseDTO;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.member.repository.MemberRepository;
+import com.picky.domain.notification.entity.Notification;
+import com.picky.domain.notification.entity.enums.NotificationType;
+import com.picky.domain.notification.repository.NotificationRepository;
+import com.picky.domain.notification.service.NotificationService;
 import com.picky.domain.question.entity.Question;
 import com.picky.domain.question.repository.QuestionRepository;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +37,8 @@ public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final MemberRepository memberRepository;
     private final QuestionRepository questionRepository;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public MyAnswersResponseDTO getMyAnswers(Long memberId) {
@@ -80,7 +87,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public AnswerCreateResponseDTO createAnswer(Long questionId, Long memberId, AnswerCreateRequestDTO request) {
 
-        Member member = memberRepository.findById(memberId)
+        Member answerer = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         Question question = questionRepository.findById(questionId)
@@ -94,12 +101,52 @@ public class AnswerServiceImpl implements AnswerService {
             if (parentAnswer.getParentAnswer() != null) {
                 throw new GeneralException(ErrorStatus.INVALID_PARENT_ANSWER);
             }
+
+            // 대댓글 알림
+            Member parentAnswerAuthor = parentAnswer.getMember();
+            if (!parentAnswerAuthor.getId().equals(answerer.getId())) { // 본인 댓글에 대댓글 다는건 알림 X
+                String title = "Picky";
+                String body = answerer.getNickname() + "님이 회원님의 답변에 답글을 남겼습니다.";
+                Map<String, String> data = new HashMap<>();
+                data.put("type", "NEW_REPLY");
+                data.put("questionId", String.valueOf(questionId));
+                notificationService.sendNotification(title, body, answerer.getProfileImg(), parentAnswerAuthor, data);
+
+                // DB에 알림 저장
+                Notification notification = Notification.builder()
+                                                        .member(parentAnswerAuthor)
+                                                        .content(body)
+                                                        .notificationType(NotificationType.NEW_REPLY)
+                                                        .questionId(questionId)
+                                                        .parentId(parentAnswer.getId())
+                                                        .build();
+                notificationRepository.save(notification);
+            }
+        } else { // 일반 댓글 알림
+            Member questionAuthor = question.getMember();
+            if (!questionAuthor.getId().equals(answerer.getId())) { // 본인 질문에 답변 다는건 알림 X
+                String title = "Picky";
+                String body = answerer.getNickname() + "님이 회원님의 질문에 답변을 남겼습니다.";
+                Map<String, String> data = new HashMap<>();
+                data.put("type", "NEW_ANSWER");
+                data.put("questionId", String.valueOf(questionId));
+                notificationService.sendNotification(title, body, answerer.getProfileImg(), questionAuthor, data);
+
+                // DB에 알림 저장
+                Notification notification = Notification.builder()
+                                                        .member(questionAuthor)
+                                                        .content(body)
+                                                        .notificationType(NotificationType.NEW_ANSWER)
+                                                        .questionId(questionId)
+                                                        .build();
+                notificationRepository.save(notification);
+            }
         }
 
         Answer answer = Answer.builder()
                 .content(request.getContent())
                 .isAiGenerated(request.getIsAI())
-                .member(member)
+                .member(answerer)
                 .question(question)
                 .parentAnswer(parentAnswer) // 부모 답변 설정
                 .build();
@@ -109,7 +156,7 @@ public class AnswerServiceImpl implements AnswerService {
         return AnswerCreateResponseDTO.builder()
                 .id(savedAnswer.getId())
                 .content(savedAnswer.getContent())
-                .author(member.getName())
+                .author(answerer.getName())
                 .isAI(savedAnswer.getIsAiGenerated())
                 .createdAt(savedAnswer.getCreatedAt())
                 .build();
