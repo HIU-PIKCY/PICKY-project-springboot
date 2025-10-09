@@ -25,8 +25,8 @@ public class RecommendationResponseDTO {
         @Schema(description = "관련 질문 ID")
         private Long relatedQuestionId;
 
-        @Schema(description = "추천 키워드", example = "가치관")
-        private String recommendationKeyword;
+        @Schema(description = "관련 질문 제목")
+        private String relatedQuestionTitle;
     }
 
     @Getter
