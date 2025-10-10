@@ -65,7 +65,6 @@ public class Member extends BaseEntity {
 
   private String profileImg;
 
-  @Column(unique = true)
   private String fcmToken;
 
   public void updateFcmToken(String fcmToken) {
