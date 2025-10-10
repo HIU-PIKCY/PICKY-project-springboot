@@ -3,12 +3,6 @@ package com.picky.domain.ai.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.picky.domain.question.entity.enums.Keyword;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.picky.apiPayload.code.status.ErrorStatus;
 import com.picky.apiPayload.exception.GeneralException;
 import com.picky.domain.ai.web.dto.AiRequestDTO.AiQuestionRequestDTO;
@@ -17,9 +11,12 @@ import com.picky.domain.book.entity.Book;
 import com.picky.domain.book.repository.BookRepository;
 import com.picky.domain.member.entity.Member;
 import com.picky.domain.question.entity.Question;
+import com.picky.domain.question.entity.enums.Keyword;
 import com.picky.domain.question.repository.QuestionRepository;
 import com.picky.domain.question.web.dto.QuestionResponseDTO.QuestionPostResponseDTO;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,13 +96,24 @@ public class AiService {
 
                         log.info("OpenAI content field: {}", content);
 
-                        JsonNode inner = objectMapper.readTree(content);
-                        String summary = inner.path("summary").asText();
-                        String hashtags = inner.path("hashtags").asText();
+                        int startIndex = content.indexOf('{');
+                        int endIndex = content.lastIndexOf('}');
 
-                        log.info("Parsed summary={}, hashtags={}", summary, hashtags);
+                        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+                            String jsonContent = content.substring(startIndex, endIndex + 1);
 
-                        return Mono.just(new AIResponseDTO(summary, hashtags));
+                            JsonNode inner = objectMapper.readTree(jsonContent);
+                            String summary = inner.path("summary").asText();
+                            String hashtags = inner.path("hashtags").asText();
+
+                            log.info("Parsed summary={}, hashtags={}", summary, hashtags);
+
+                            return Mono.just(new AIResponseDTO(summary, hashtags));
+
+                        } else {
+                            // 만약 응답에서 JSON 형태 찾지 못하면 에러
+                            throw new Exception("Could not find a valid JSON object in the content: " + content);
+                        }
 
                     } catch (Exception e) {
                         log.error("Failed to parse OpenAI response: {}", responseBody, e);

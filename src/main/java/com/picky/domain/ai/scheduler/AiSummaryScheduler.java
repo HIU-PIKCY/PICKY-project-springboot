@@ -47,6 +47,12 @@ public class AiSummaryScheduler {
 
         Question hotQuestion = hotQuestionOpt.get();
 
+        // 댓글이 하나도 없으면 AI 요약을 시도하지 않고 바로 종료
+        if (hotQuestion.getAnswers().isEmpty()) {
+            log.info("[AiSummaryScheduler] 질문 ID {} 에는 댓글이 없어 요약 작업을 건너뜁니다.", hotQuestion.getId());
+            return;
+        }
+
         if (hotQuestion.getAiSummary() != null && !hotQuestion.getAiSummary().isEmpty()) {
             log.info("[AiSummaryScheduler] 질문 ID {} 는 이미 요약이 되어 있습니다. 작업을 종료합니다.", hotQuestion.getId());
             return;
