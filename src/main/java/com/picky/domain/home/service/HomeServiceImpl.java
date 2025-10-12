@@ -80,6 +80,7 @@ public class HomeServiceImpl implements HomeService {
                                                       .bookId(book.getId())
                                                       .bookTitle(book.getTitle())
                                                       .bookAuthor(book.getAuthor())
+                                                      .bookIsbn(book.getIsbn())
                                                       .bookCover(book.getCoverImage())
                                                       .build())
             .toList();

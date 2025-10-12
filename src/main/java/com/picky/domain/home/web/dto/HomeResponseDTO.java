@@ -48,6 +48,7 @@ public class HomeResponseDTO {
         private Long bookId;
         private String bookTitle;
         private String bookAuthor;
+        private String bookIsbn;
         private String bookCover;
     }
 
