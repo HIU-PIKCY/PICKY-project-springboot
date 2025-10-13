@@ -27,7 +27,7 @@ public class AiSummaryScheduler {
     private final QuestionAiUpdateService questionAiUpdateService;
 
     @Transactional
-    @Scheduled(cron = "0 00 16 * * MON") // 매주 월요일 자정에 실행
+    @Scheduled(cron = "0 09 17 * * MON") // 매주 월요일 자정에 실행
     public void summarizeHotTopic() {
         log.info("[AiSummaryScheduler] 매시간 핫토픽 요약 작업 시작");
 
