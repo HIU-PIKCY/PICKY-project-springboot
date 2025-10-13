@@ -57,7 +57,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         if (userKeywords.isEmpty()) {
         //    log.warn("[추천 실패] 사용자 ID: {} - 작성한 질문이 없습니다.", memberId);
-            throw new GeneralException(ErrorStatus.QUESTION_BAD_REQUEST);
+            return null;
         }
 
         // 키워드 빈도수 계산
@@ -85,8 +85,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (relatedKeywords.isEmpty()) {
         //    log.warn("[추천 실패] 키워드: '{}' - 다른 사용자의 관련 질문이 없습니다.",
         //            mostFrequentKeyword.getDisplayName());
-            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
-                    "해당 키워드로 추천할 수 있는 책이 없습니다.");
+            return null;
         }
 
         // 질문 리스트 추출 (중복 제거)
@@ -203,7 +202,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<Answer> myAnswers = answerRepository.findByMemberId(memberId);
 
         if (myAnswers.isEmpty()) {
-            throw new GeneralException(ErrorStatus.ANSWER_BAD_REQUEST);
+            return null;
         }
 
         // 2. 질문이 연결된 답변만 필터링
@@ -212,8 +211,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .toList();
 
         if (answersWithQuestion.isEmpty()) {
-            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
-                    "답변한 질문이 없습니다.");
+            return null;
         }
 
         // 3. 랜덤으로 하나의 답변 선택
@@ -229,8 +227,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .findByQuestionId(myAnsweredQuestion.getId());
 
         if (questionKeywords.isEmpty()) {
-            throw new GeneralException(ErrorStatus.KEYWORD_NOT_FOUND,
-                    "해당 질문에 키워드가 없습니다.");
+            return null;
         }
 
         // 6. 키워드들을 추출
@@ -243,8 +240,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .findByKeywordInAndQuestionIdNot(keywords, myAnsweredQuestion.getId());
 
         if (relatedKeywords.isEmpty()) {
-            throw new GeneralException(ErrorStatus.QUESTION_NOT_FOUND,
-                    "해당 키워드로 추천할 수 있는 책이 없습니다.");
+            return null;
         }
 
         // 8. 질문 리스트 추출 (책이 있고, 중복 제거)
@@ -255,8 +251,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .toList();
 
         if (relatedQuestions.isEmpty()) {
-            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND,
-                    "해당 키워드를 사용한 질문 중 책이 연결된 질문이 없습니다.");
+            return null;
         }
 
         // 9. 랜덤으로 하나의 질문 선택
