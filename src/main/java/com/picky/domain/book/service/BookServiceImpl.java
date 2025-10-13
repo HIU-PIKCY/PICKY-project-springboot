@@ -78,7 +78,7 @@ public class BookServiceImpl implements BookService {
                 .bodyToMono(BookResponseDTO.class)
                 .block();
 
-        List<BookDTO> dtos = Optional.ofNullable(response)
+        List<BookDTO> dtos = new ArrayList<>(Optional.ofNullable(response)
                 .map(BookResponseDTO::getItem) // response가 null이면 빈 리스트 처리
                 .orElse(Collections.emptyList())
                 .stream()
@@ -103,7 +103,13 @@ public class BookServiceImpl implements BookService {
                             .publishedAt(item.getPubDate())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .filter(dto -> dto.getIsbn() != null && !dto.getIsbn().isEmpty()) // ISBN이 있는 것만
+                .collect(Collectors.toMap(
+                        BookDTO::getIsbn,           // key: ISBN
+                        dto -> dto,                  // value: BookDTO 자체
+                        (existing, replacement) -> existing // 중복 시 먼저 나온 것 유지
+                ))
+                .values());
 
         int totalCount = Optional.ofNullable(response)
                 .map(BookResponseDTO::getTotalResults)
