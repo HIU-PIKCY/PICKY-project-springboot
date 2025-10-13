@@ -43,31 +43,31 @@ public class AiService {
         String commentStr = String.join("\n- ", comments);
 
         return String.format(
-                """
-                        아래는 책에 대한 하나의 질문과 그에 대한 여러 댓글들입니다. 전체 내용을 분석해서 다음 두 가지 작업을 수행해주세요.
-                        
-                        [질문 제목]
-                        %s
-                        
-                        [질문 내용]
-                        %s
-                        
-                        [댓글 목록]
-                        - %s
-                        
-                        ---
-                        
-                        [작업]
-                        1. 전체 토론 내용을 핵심만 요약해서 한 문장의 한국어로 작성해주세요.
-                        2. 이 토론의 핵심을 나타내는 해시태그를 3개 생성해주세요. '#'으로 시작하고 콤마(,)로 구분해주세요. (예: #토론,#서사불쌍,#무한공감)
-                        
-                        [출력 형식]
-                        반드시 아래와 같은 JSON 형식으로만 응답해주세요. 다른 설명은 추가하지 마세요.
-                        {
-                          "summary": "요약 내용",
-                          "hashtags": "#해시태그1,#해시태그2,#해시태그3"
-                        }
-                        """, questionTitle, questionContent, commentStr
+            """
+                    아래는 책에 대한 하나의 질문과 그에 대한 여러 댓글들입니다. 전체 내용을 분석해서 다음 두 가지 작업을 수행해주세요.
+                    
+                    [질문 제목]
+                    %s
+                    
+                    [질문 내용]
+                    %s
+                    
+                    [댓글 목록]
+                    - %s
+                    
+                    ---
+                    
+                    [작업]
+                    1. 토론의 핵심 내용을 단순히 요약하는 대신, 댓글에서 나타나는 다양한 시각이나 대립하는 의견들을 중심으로 토론의 양상을 설명해주세요. 예를 들어, "%s" 와 같이 제3자 관찰자 시점의 문장으로 작성해주세요. 문장은 반드시 '~다.'로 끝나야 합니다.
+                    2. 이 토론의 핵심을 나타내는 해시태그를 3개 생성해주세요. '#'으로 시작하고 콤마(,)로 구분해주세요. (예: #토론,#서사불쌍,#무한공감)
+                    
+                    [출력 형식]
+                    반드시 아래와 같은 JSON 형식으로만 응답해주세요. 다른 설명은 추가하지 마세요.
+                    {
+                      "summary": "요약 내용",
+                      "hashtags": "#해시태그1,#해시태그2,#해시태그3"
+                    }
+                    """, questionTitle, questionContent, commentStr, "요조의 삶을 연민으로 바라보는 시선과 무책임함으로 비판하는 시선이 맞서며 다양한 논의가 이어진다."
         );
     }
 
@@ -76,7 +76,7 @@ public class AiService {
 
         List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
         Map<String, Object> body = Map.of(
-                "model", "gpt-3.5-turbo",
+                "model", "gpt-4.1",
                 "messages", messages,
                 "temperature", 0.7
         );
@@ -196,7 +196,7 @@ public class AiService {
 
         List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
         Map<String, Object> body = Map.of(
-                "model", "gpt-3.5-turbo",
+                "model", "gpt-4.1",
                 "messages", messages,
                 "temperature", 0.8
         );
@@ -294,7 +294,7 @@ public class AiService {
 
         List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
         Map<String, Object> body = Map.of(
-                "model", "gpt-3.5-turbo",
+                "model", "gpt-4.1",
                 "messages", messages,
                 "temperature", 0.8
         );
@@ -331,7 +331,7 @@ public class AiService {
 
         List<Map<String, String>> messages = List.of(Map.of("role", "user", "content", prompt));
         Map<String, Object> body = Map.of(
-            "model", "gpt-3.5-turbo",
+            "model", "gpt-4.1",
             "messages", messages,
             "temperature", 0.2
         );
