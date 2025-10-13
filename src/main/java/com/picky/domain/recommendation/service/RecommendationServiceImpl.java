@@ -25,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -78,6 +79,12 @@ public class RecommendationServiceImpl implements RecommendationService {
         //log.info("[키워드 분석] 가장 많이 사용된 키워드: '{}' ({}회 사용)",
         //        mostFrequentKeyword.getDisplayName(), keywordCount);
 
+        // 사용자의 서재에 있는 책 ID 목록 가져오기
+        Set<Long> myBookIds = bookShelfRepository.findByMemberId(memberId).stream()
+                .map(bookshelf -> bookshelf.getBook().getId())
+                .collect(Collectors.toSet());
+
+
         // 2. 해당 키워드를 사용한 다른 사용자들의 질문 찾기
         List<QuestionKeyword> relatedKeywords = questionKeywordRepository
                 .findByKeywordAndQuestionMemberIdNot(mostFrequentKeyword, memberId);
@@ -92,8 +99,14 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<Question> relatedQuestions = relatedKeywords.stream()
                 .map(QuestionKeyword::getQuestion)
                 .filter(q -> q.getBook() != null) // 책이 있는 질문만
+                .filter(q -> !myBookIds.contains(q.getBook().getId())) // 내 서재에 없는 책만
                 .distinct()
                 .toList();
+
+        // 내 서재에 없는 책이 하나도 없으면 null 반환
+        if (relatedQuestions.isEmpty()) {
+            return null;
+        }
 
         //log.info("[질문 검색] 키워드 '{}' 관련 질문 {}개 발견",
         //        mostFrequentKeyword.getDisplayName(), relatedQuestions.size());
@@ -235,6 +248,11 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(QuestionKeyword::getKeyword)
                 .toList();
 
+        // 사용자의 서재에 있는 책 ID 목록 가져오기
+        Set<Long> myBookIds = bookShelfRepository.findByMemberId(memberId).stream()
+                .map(bookshelf -> bookshelf.getBook().getId())
+                .collect(Collectors.toSet());
+
         // 7. 그 키워드들을 사용한 다른 사용자의 질문 찾기 (내 답변에 연결된 질문 제외)
         List<QuestionKeyword> relatedKeywords = questionKeywordRepository
                 .findByKeywordInAndQuestionIdNot(keywords, myAnsweredQuestion.getId());
@@ -247,6 +265,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<Question> relatedQuestions = relatedKeywords.stream()
                 .map(QuestionKeyword::getQuestion)
                 .filter(q -> q.getBook() != null) // 책이 있는 질문만
+                .filter(q -> !myBookIds.contains(q.getBook().getId())) // 내 서재에 없는 책만
                 .distinct()
                 .toList();
 
